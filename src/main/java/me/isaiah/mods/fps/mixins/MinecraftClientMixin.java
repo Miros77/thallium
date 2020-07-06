@@ -29,18 +29,11 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.TickDurationMonitor;
 import net.minecraft.util.Util;
-import net.minecraft.util.crash.CrashException;
 import net.minecraft.util.profiler.ProfileResult;
 import net.minecraft.util.profiler.Profiler;
 
 @Mixin(MinecraftClient.class)
 public class MinecraftClientMixin {
-
-    @Shadow
-    public Thread thread;
-
-    @Shadow
-    public boolean running;
 
     @Shadow
     public Profiler profiler;
@@ -143,34 +136,10 @@ public class MinecraftClientMixin {
     public void endMonitor(boolean a, TickDurationMonitor b) {
     }
 
-
-    @Overwrite
-    public void run() {
-        this.thread = Thread.currentThread();
-        try {
-            boolean bl = false;
-            while (this.running) {
-                try {
-                    TickDurationMonitor tickDurationMonitor = TickDurationMonitor.create("Renderer");
-                    boolean bl2 = this.shouldMonitorTickDuration();
-                    this.startMonitor(bl2, tickDurationMonitor);
-                    this.profiler.startTick();
-                    this.render(!bl);
-                    this.profiler.endTick();
-                    this.endMonitor(bl2, tickDurationMonitor);
-                } catch (OutOfMemoryError outOfMemoryError) {
-                }
-            }
-        } catch (CrashException crashException) {
-            MinecraftClient.printCrashReport(crashException.getReport());
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-        }
-    }
-
     private boolean doUpdate = false;
     private long last;
 
+    @Overwrite
     private void render(boolean tick) {
         boolean bl;
         Runnable runnable;
