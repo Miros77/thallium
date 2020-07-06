@@ -122,11 +122,11 @@ public class MinecraftClientMixin {
 
         this.window.setPhase("Post render");
         ++this.fpsCounter;
-        boolean bl2 = bl = this.isIntegratedServerRunning() && (this.currentScreen != null && this.currentScreen.isPauseScreen() || this.overlay != null && this.overlay.pausesGame()) && !this.server.isRemote();
+        bl = this.isIntegratedServerRunning() && (this.currentScreen != null && this.currentScreen.isPauseScreen() || this.overlay != null && this.overlay.pausesGame()) && !this.server.isRemote();
         if (this.paused != bl) {
-            if (this.paused) {
+            if (this.paused)
                 this.pausedTickDelta = this.renderTickCounter.tickDelta;
-            } else
+            else
                 this.renderTickCounter.tickDelta = this.pausedTickDelta;
             this.paused = bl;
         }
@@ -159,8 +159,7 @@ public class MinecraftClientMixin {
                 doUpdate = true;
             } else doUpdate = false;
             c++;
-            if (c > 10)
-                c = 0;
+            if (c > 10) c = 0;
         }
     }
 
