@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "fpsbooster",
+  "version": "1.0",
+
+  "name": "Extreme Fps Optimizer",
+  "description": "Optimizes rendering to increase FPS by 5x",
+  "authors": [
+    "Isaiah"
+  ],
+
+  "license": "CC0-1.0",
+  "icon": "assets/modid/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "me.isaiah.mods.fps.FpsBoostMod"
+    ]
+  },
+  "mixins": [
+    "fpsboost.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+    "minecraft": "1.16.x"
+  }
+
+}
