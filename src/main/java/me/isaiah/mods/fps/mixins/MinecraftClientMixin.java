@@ -11,7 +11,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import me.isaiah.mods.fps.interfaces.IThreadExecutor;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.Mouse;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gui.screen.Overlay;
 import net.minecraft.client.gui.screen.Screen;
@@ -27,117 +26,48 @@ import net.minecraft.client.toast.ToastManager;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.util.TickDurationMonitor;
 import net.minecraft.util.Util;
 import net.minecraft.util.profiler.ProfileResult;
-import net.minecraft.util.profiler.Profiler;
 
 @Mixin(MinecraftClient.class)
 public class MinecraftClientMixin {
 
-    @Shadow
-    public Profiler profiler;
+    // Shadow Fields
+    @Shadow public Window window;
+    @Shadow public boolean paused;
+    @Shadow public int fpsCounter;
+    @Shadow public static int currentFps;
+    @Shadow public GameOptions options;
+    @Shadow public String fpsDebugString;
+    @Shadow public long nextDebugInfoUpdateTime;
+    @Shadow private CompletableFuture<Void> resourceReloadFuture;
+    @Shadow public Screen currentScreen;
+    @Shadow public Overlay overlay;
+    @Shadow private Queue<Runnable> renderTaskQueue;
+    @Shadow private RenderTickCounter renderTickCounter;
+    @Shadow private float pausedTickDelta;
+    @Shadow private IntegratedServer server;
+    @Shadow private SoundManager soundManager;
+    @Shadow public GameRenderer gameRenderer;
+    @Shadow public Framebuffer framebuffer;
+    @Shadow public boolean skipGameRender;
+    @Shadow public ToastManager toastManager;
+    @Shadow private ProfileResult tickProfilerResult;
 
-    @Shadow
-    public Window window;
+    // Shadow Methods
+    @Shadow public boolean shouldMonitorTickDuration() {return false;}
+    @Shadow public boolean isIntegratedServerRunning() {return false;}
+    @Shadow public int getFramerateLimit() {return 0;}
+    @Shadow public void scheduleStop() {}
+    @Shadow public void tick() {}
+    @Shadow public CompletableFuture<Void> reloadResources() {return null;}
 
-    @Shadow
-    public boolean paused;
-
-    @Shadow
-    public int fpsCounter;
-
-    @Shadow
-    public static int currentFps;
-
-    @Shadow
-    public GameOptions options;
-
-    @Shadow
-    public String fpsDebugString;
-
-    @Shadow
-    public long nextDebugInfoUpdateTime;
-
-    @Shadow
-    private CompletableFuture<Void> resourceReloadFuture;
-
-    @Shadow
-    public Screen currentScreen;
-
-    @Shadow
-    public Overlay overlay;
-
-    @Shadow
-    private Queue<Runnable> renderTaskQueue;
-
-    @Shadow
-    private RenderTickCounter renderTickCounter;
-
-    @Shadow
-    private float pausedTickDelta;
-
-    @Shadow
-    private IntegratedServer server;
-
-    @Shadow
-    private Mouse mouse;
-
-    @Shadow
-    private SoundManager soundManager;
-
-    @Shadow
-    public GameRenderer gameRenderer;
-
-    @Shadow
-    public Framebuffer framebuffer;
-
-    @Shadow
-    public boolean skipGameRender;
-
-    @Shadow
-    public ToastManager toastManager;
-
-    @Shadow
-    private ProfileResult tickProfilerResult;
-
-    @Shadow
-    public boolean shouldMonitorTickDuration() {
-        return false;
-    }
-
-    @Shadow
-    public boolean isIntegratedServerRunning() {
-        return false;
-    }
-
-    @Shadow
-    public int getFramerateLimit() {
-        return 0;
-    }
-
-    @Shadow
-    public void scheduleStop() {}
-
-    @Shadow
-    public void tick() {}
-
-    @Shadow
-    private void drawProfilerResults(MatrixStack matrixStack, ProfileResult profileResult) {}
-
-    @Shadow
-    public CompletableFuture<Void> reloadResources() {return null;}
-
-    @Shadow
-    public void startMonitor(boolean a, TickDurationMonitor b) {
-    }
-
-    @Shadow
-    public void endMonitor(boolean a, TickDurationMonitor b) {
-    }
 
     private boolean doUpdate = false;
     private long last;
+
+    private int a = 0;
+    private int c = 0;
 
     @Overwrite
     private void render(boolean tick) {
@@ -146,9 +76,9 @@ public class MinecraftClientMixin {
         this.window.setPhase("Pre render");
 
         long l = Util.getMeasuringTimeNano();
-        if (this.window.shouldClose()) {
+        if (this.window.shouldClose())
             this.scheduleStop();
-        }
+
         if (this.resourceReloadFuture != null && !(this.overlay instanceof SplashScreen)) {
             CompletableFuture<Void> completableFuture = this.resourceReloadFuture;
             this.resourceReloadFuture = null;
@@ -162,9 +92,7 @@ public class MinecraftClientMixin {
             ((IThreadExecutor)(Object)this).runTasks();
             for (int j = 0; j < Math.min(10, i); ++j)
                 this.tick();
-
         }
-        this.mouse.updateMouse();
         this.window.setPhase("Render");
         this.soundManager.updateListenerPosition(this.gameRenderer.getCamera());
         RenderSystem.pushMatrix();
@@ -174,24 +102,23 @@ public class MinecraftClientMixin {
         RenderSystem.enableTexture();
         RenderSystem.enableCull();
 
-        if (!this.skipGameRender) {
-            if (doUpdate) this.profiler.swap("gameRenderer");
-            if (doUpdate) this.gameRenderer.render(this.paused ? this.pausedTickDelta : this.renderTickCounter.tickDelta, l, tick);
+        if (!this.skipGameRender && doUpdate) {
+            this.gameRenderer.render(this.paused ? this.pausedTickDelta : this.renderTickCounter.tickDelta, l, tick);
             this.toastManager.draw(new MatrixStack());
         }
-
-        if (this.tickProfilerResult != null)
-            this.drawProfilerResults(new MatrixStack(), this.tickProfilerResult);
 
         this.framebuffer.endWrite();
         RenderSystem.popMatrix();
         RenderSystem.pushMatrix();
 
-
         this.framebuffer.draw(this.window.getFramebufferWidth(), this.window.getFramebufferHeight());
 
         RenderSystem.popMatrix();
         this.window.swapBuffers();
+
+        int k = this.getFramerateLimit();
+        if ((double)k < Option.FRAMERATE_LIMIT.getMax())
+            RenderSystem.limitDisplayFPS(k);
 
         this.window.setPhase("Post render");
         ++this.fpsCounter;
@@ -204,24 +131,37 @@ public class MinecraftClientMixin {
             this.paused = bl;
         }
 
-        int width = this.window.getWidth();
-        int height = this.window.getWidth();
-
-        int mode = 0;
-        if (width > 1200 && height > 800) mode = 1;
-
         while (Util.getMeasuringTimeMs() >= this.nextDebugInfoUpdateTime + 1000L) {
             currentFps = this.fpsCounter;
             this.fpsDebugString = String.format("%d fps T: %s%s%s%s B: %d", currentFps, (double)this.options.maxFps == Option.FRAMERATE_LIMIT.getMax() ? "inf" : Integer.valueOf(this.options.maxFps), this.options.enableVsync ? " vsync" : "", this.options.graphicsMode.toString(), this.options.cloudRenderMode == CloudRenderMode.OFF ? "" : (this.options.cloudRenderMode == CloudRenderMode.FAST ? " fast-clouds" : " fancy-clouds"), this.options.biomeBlendRadius);
             this.nextDebugInfoUpdateTime += 1000L;
             this.fpsCounter = 0;
+            a = 0;
+            c = 0;
         }
 
         long took = (System.currentTimeMillis());
-        if (took - last > (mode == 0 ? 70 : 80)) {
+        int skip = 60;
+
+        // Stabilize large FPS
+        if (currentFps > 720) skip = 50;
+        if (currentFps > 800) skip = 40;
+        if (currentFps > 880) skip = 30;
+
+        // If FPS is low, lower amount of rendering time.
+        if (took - last > skip) {
             doUpdate = true;
             last = took;
-        } else doUpdate = false;
+            a++;
+        } else {
+            if (c == 0 && a < 50) {
+                a++;
+                doUpdate = true;
+            } else doUpdate = false;
+            c++;
+            if (c > 10)
+                c = 0;
+        }
     }
 
 }
