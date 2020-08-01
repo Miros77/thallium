@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
-  "id": "fpsbooster",
-  "version": "1.0",
+  "id": "thallium",
+  "version": "${version}",
 
-  "name": "Extreme Fps Optimizer",
-  "description": "Optimizes rendering to increase FPS by 5x",
+  "name": "Thallium",
+  "description": "Thallium - Optimizes the game",
   "authors": [
     "Isaiah"
   ],
 
-  "license": "CC0-1.0",
+  "license": "GPLv3",
   "icon": "assets/modid/icon.png",
   "accessWidener" : "fpsboost.accesswidener",
 
   "environment": "*",
   "entrypoints": {
     "main": [
-      "me.isaiah.mods.fps.FpsBoostMod"
+      "me.isaiah.mods.fps.ThalliumMod"
     ]
   },
   "mixins": [

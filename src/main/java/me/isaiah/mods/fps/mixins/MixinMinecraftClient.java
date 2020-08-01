@@ -27,10 +27,9 @@ import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.Util;
-import net.minecraft.util.profiler.ProfileResult;
 
 @Mixin(MinecraftClient.class)
-public class MinecraftClientMixin {
+public class MixinMinecraftClient {
 
     // Shadow Fields
     @Shadow public Window window;
@@ -52,10 +51,8 @@ public class MinecraftClientMixin {
     @Shadow public Framebuffer framebuffer;
     @Shadow public boolean skipGameRender;
     @Shadow public ToastManager toastManager;
-    @Shadow private ProfileResult tickProfilerResult;
 
     // Shadow Methods
-    @Shadow public boolean shouldMonitorTickDuration() {return false;}
     @Shadow public boolean isIntegratedServerRunning() {return false;}
     @Shadow public int getFramerateLimit() {return 0;}
     @Shadow public void scheduleStop() {}
@@ -69,10 +66,10 @@ public class MinecraftClientMixin {
     private int a = 0;
     private int c = 0;
 
+    private long lastFpsUpdateTime;
+
     @Overwrite
     private void render(boolean tick) {
-        boolean bl;
-        Runnable runnable;
         this.window.setPhase("Pre render");
 
         long l = Util.getMeasuringTimeNano();
@@ -84,8 +81,8 @@ public class MinecraftClientMixin {
             this.resourceReloadFuture = null;
             this.reloadResources().thenRun(() -> completableFuture.complete(null));
         }
-        while ((runnable = this.renderTaskQueue.poll()) != null)
-            runnable.run();
+        Runnable runnable;
+        while ((runnable = this.renderTaskQueue.poll()) != null) runnable.run();
 
         if (tick) {
             int i = this.renderTickCounter.beginRenderTick(Util.getMeasuringTimeMs());
@@ -93,6 +90,7 @@ public class MinecraftClientMixin {
             for (int j = 0; j < Math.min(10, i); ++j)
                 this.tick();
         }
+
         this.window.setPhase("Render");
         this.soundManager.updateListenerPosition(this.gameRenderer.getCamera());
         RenderSystem.pushMatrix();
@@ -102,6 +100,7 @@ public class MinecraftClientMixin {
         RenderSystem.enableTexture();
         RenderSystem.enableCull();
 
+        // Also check our doUpdate boolean to keep backwards-compatibility with the vanilla behavior 
         if (!this.skipGameRender && doUpdate) {
             this.gameRenderer.render(this.paused ? this.pausedTickDelta : this.renderTickCounter.tickDelta, l, tick);
             this.toastManager.draw(new MatrixStack());
@@ -117,38 +116,39 @@ public class MinecraftClientMixin {
         this.window.swapBuffers();
 
         int k = this.getFramerateLimit();
-        if ((double)k < Option.FRAMERATE_LIMIT.getMax())
-            RenderSystem.limitDisplayFPS(k);
+        if ((double)k < Option.FRAMERATE_LIMIT.getMax()) RenderSystem.limitDisplayFPS(k);
 
         this.window.setPhase("Post render");
         ++this.fpsCounter;
-        bl = this.isIntegratedServerRunning() && (this.currentScreen != null && this.currentScreen.isPauseScreen() || this.overlay != null && this.overlay.pausesGame()) && !this.server.isRemote();
+        boolean bl = this.isIntegratedServerRunning() && (this.currentScreen != null && this.currentScreen.isPauseScreen() || this.overlay != null && this.overlay.pausesGame()) && !this.server.isRemote();
         if (this.paused != bl) {
             if (this.paused)
-                this.pausedTickDelta = this.renderTickCounter.tickDelta;
-            else
-                this.renderTickCounter.tickDelta = this.pausedTickDelta;
+                 this.pausedTickDelta = this.renderTickCounter.tickDelta;
+            else this.renderTickCounter.tickDelta = this.pausedTickDelta;
             this.paused = bl;
         }
 
-        while (Util.getMeasuringTimeMs() >= this.nextDebugInfoUpdateTime + 1000L) {
+        // Thallium - Replaced while loop
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastFpsUpdateTime >= 1000) {
+            lastFpsUpdateTime = currentTime;
             currentFps = this.fpsCounter;
-            this.fpsDebugString = String.format("%d fps T: %s%s%s%s B: %d", currentFps, (double)this.options.maxFps == Option.FRAMERATE_LIMIT.getMax() ? "inf" : Integer.valueOf(this.options.maxFps), this.options.enableVsync ? " vsync" : "", this.options.graphicsMode.toString(), this.options.cloudRenderMode == CloudRenderMode.OFF ? "" : (this.options.cloudRenderMode == CloudRenderMode.FAST ? " fast-clouds" : " fancy-clouds"), this.options.biomeBlendRadius);
-            this.nextDebugInfoUpdateTime += 1000L;
+            this.fpsDebugString = String.format("%d fps T: %s%s%s%s B: %d. +Thallium", currentFps, (double)this.options.maxFps == Option.FRAMERATE_LIMIT.getMax() ? "inf" : Integer.valueOf(this.options.maxFps), this.options.enableVsync ? " vsync" : "", this.options.graphicsMode.toString(), this.options.cloudRenderMode == CloudRenderMode.OFF ? "" : (this.options.cloudRenderMode == CloudRenderMode.FAST ? " fast-clouds" : " fancy-clouds"), this.options.biomeBlendRadius);
             this.fpsCounter = 0;
-            a = 0;
-            c = 0;
         }
 
         long took = (System.currentTimeMillis());
         int skip = 60;
 
-        // Stabilize large FPS
-        if (currentFps > 720) skip = 50;
-        if (currentFps > 800) skip = 40;
-        if (currentFps > 880) skip = 30;
+        // Thallium - Stabilize large FPS
+        if (currentFps > 500) skip = 50;
+        if (currentFps > 580) skip = 40;
+        if (currentFps > 650) skip = 30;
+        if (currentFps > 900) skip = 20;
+        if (currentFps > 980) skip = 15;
+        if (currentFps > 1250) skip = 10;
 
-        // If FPS is low, lower amount of rendering time.
+        // Thallium - If FPS is low, lower amount of processing
         if (took - last > skip) {
             doUpdate = true;
             last = took;

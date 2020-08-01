@@ -7,7 +7,7 @@ import me.isaiah.mods.fps.interfaces.IThreadExecutor;
 import net.minecraft.util.thread.ThreadExecutor;
 
 @Mixin(ThreadExecutor.class)
-public class ThreadExecutorMixin implements IThreadExecutor {
+public class MixinThreadExecutor implements IThreadExecutor {
 
     @Override
     @Shadow
