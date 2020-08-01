@@ -1,4 +1,4 @@
-package me.isaiah.mods.fps.mixins;
+package thallium.fabric.mixins;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;

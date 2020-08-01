@@ -1,10 +1,9 @@
-package me.isaiah.mods.fps.mixins;
+package thallium.fabric.mixins;
 
-import thallium.chunk.ThalliumClientChunkManager;
+import thallium.fabric.chunk.ThalliumClientChunkManager;
 
 import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.client.world.ClientWorld;
-
 
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;

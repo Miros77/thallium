@@ -10,17 +10,17 @@
   ],
 
   "license": "GPLv3",
-  "icon": "assets/modid/icon.png",
-  "accessWidener" : "fpsboost.accesswidener",
+  "icon": "assets/thallium/icon.png",
+  "accessWidener" : "thallium.accesswidener",
 
   "environment": "*",
   "entrypoints": {
     "main": [
-      "me.isaiah.mods.fps.ThalliumMod"
+      "thallium.fabric.ThalliumMod"
     ]
   },
   "mixins": [
-    "fpsboost.mixins.json"
+    "thallium.mixins.json"
   ],
 
   "depends": {

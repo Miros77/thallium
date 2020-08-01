@@ -1,4 +1,4 @@
-package me.isaiah.mods.fps.interfaces;
+package thallium.fabric.interfaces;
 
 public interface IThreadExecutor {
 

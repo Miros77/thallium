@@ -1,4 +1,4 @@
-package thallium.chunk;
+package thallium.fabric.chunk;
 
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;

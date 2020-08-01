@@ -1,4 +1,4 @@
-package me.isaiah.mods.fps.mixins;
+package thallium.fabric.mixins;
 
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import me.isaiah.mods.fps.interfaces.IThreadExecutor;
+import thallium.fabric.interfaces.IThreadExecutor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gui.screen.Overlay;

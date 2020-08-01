@@ -1,4 +1,4 @@
-package me.isaiah.mods.fps.mixins;
+package thallium.fabric.mixins;
 
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
@@ -18,7 +18,7 @@ import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.level.storage.LevelStorage.Session;
 
-import thallium.chunk.ThalliumServerChunkManager;
+import thallium.fabric.chunk.ThalliumServerChunkManager;
 
 @Mixin(ServerWorld.class)
 public abstract class MixinServerWorld {

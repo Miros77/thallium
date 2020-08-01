@@ -1,4 +1,4 @@
-package thallium.chunk;
+package thallium.fabric.chunk;
 
 import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
