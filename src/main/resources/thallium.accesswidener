@@ -37,3 +37,4 @@ extendable	method	net/minecraft/util/thread/TaskExecutor	execute	()V
 accessible	method	net/minecraft/util/thread/TaskExecutor	execute	()V
 extendable	method	net/minecraft/util/thread/TaskExecutor	runWhile	(Lit/unimi/dsi/fastutil/ints/Int2BooleanFunction;)I
 accessible	method	net/minecraft/util/thread/TaskExecutor	runWhile	(Lit/unimi/dsi/fastutil/ints/Int2BooleanFunction;)I
+accessible	class	net/minecraft/client/render/WorldRenderer$ChunkInfo

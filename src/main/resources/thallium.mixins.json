@@ -13,6 +13,11 @@
     "MixinThreadExecutor",
     "MixinGameRenderer",
     "MixinClientWorld",
+    "MixinWorldRenderer",
+    "MixinChunkData",
+    "MixinChunkInfo",
+    "MixinSpriteAtlasTexture",
+    "MixinSprite"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -144,9 +144,9 @@ public class MixinMinecraftClient {
         if (currentFps > 500) skip = 50;
         if (currentFps > 580) skip = 40;
         if (currentFps > 650) skip = 30;
-        if (currentFps > 900) skip = 20;
-        if (currentFps > 980) skip = 15;
-        if (currentFps > 1250) skip = 10;
+        if (currentFps > 900) skip = 25;
+        if (currentFps > 980) skip = 20;
+        if (currentFps > 1250) skip = 15;
 
         // Thallium - If FPS is low, lower amount of processing
         if (took - last > skip) {
