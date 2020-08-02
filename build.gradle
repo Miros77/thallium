@@ -29,6 +29,7 @@ processResources {
 
 	from(sourceSets.main.resources.srcDirs) {
 		include "fabric.mod.json"
+		include "thallium_version.txt"
 		expand "version": project.version
 	}
 

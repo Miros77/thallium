@@ -1,13 +1,19 @@
 package thallium.fabric.mixins;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
 import net.minecraft.client.render.GameRenderer;
+import thallium.fabric.ThalliumMod;
 
 @Mixin(GameRenderer.class)
 public class MixinGameRenderer {
 
-    //@Overwrite
-    //public void render(float tickDelta, long startTime, boolean tick) {
-    //}
+    @Inject(at = @At("HEAD"), method = "render", cancellable = true)
+    public void render_start(float tickDelta, long startTime, boolean tick, CallbackInfo ci) {
+        if (!ThalliumMod.doUpdate) ci.cancel();
+    }
 
 }
