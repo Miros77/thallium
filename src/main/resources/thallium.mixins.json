@@ -10,14 +10,14 @@
   ],
   "client": [
     "MixinMinecraftClient",
-    "MixinThreadExecutor",
     "MixinGameRenderer",
     "MixinClientWorld",
     "MixinWorldRenderer",
     "MixinChunkData",
     "MixinChunkInfo",
     "MixinSpriteAtlasTexture",
-    "MixinSprite"
+    "MixinSprite",
+    "MixinMathHelper"
   ],
   "injectors": {
     "defaultRequire": 1

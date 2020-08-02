@@ -13,56 +13,100 @@ public abstract class MixinBlockPos extends Vec3i {
         super(int_1, int_2, int_3);
     }
 
+    /**
+     * @author
+     * @reason Optimized
+     */
     @Overwrite
     public BlockPos up() {
         return new BlockPos(this.getX(), this.getY() + 1, this.getZ());
     }
 
+    /**
+     * @author
+     * @reason Optimized
+     */
     @Overwrite
     public BlockPos up(int int_1) {
         return new BlockPos(this.getX(), this.getY() + int_1, this.getZ());
     }
 
+    /**
+     * @author
+     * @reason Optimized
+     */
     @Overwrite
     public BlockPos north() {
         return new BlockPos(this.getX(), this.getY(), this.getZ() - 1);
     }
 
+    /**
+     * @author
+     * @reason Optimized
+     */
     @Overwrite
     public BlockPos north(int int_1) {
         return new BlockPos(this.getX(), this.getY(), this.getZ() - int_1);
     }
 
+    /**
+     * @author
+     * @reason Optimized
+     */
     @Overwrite
     public BlockPos south() {
         return new BlockPos(this.getX(), this.getY(), this.getZ() + 1);
     }
 
+    /**
+     * @author
+     * @reason Optimized
+     */
     @Overwrite
     public BlockPos south(int int_1) {
         return new BlockPos(this.getX(), this.getY(), this.getZ() + int_1);
     }
 
+    /**
+     * @author
+     * @reason Optimized
+     */
     @Overwrite
     public BlockPos west() {
         return new BlockPos(this.getX() - 1, this.getY(), this.getZ());
     }
 
+    /**
+     * @author
+     * @reason Optimized
+     */
     @Overwrite
     public BlockPos west(int int_1) {
         return new BlockPos(this.getX() - int_1, this.getY(), this.getZ());
     }
 
+    /**
+     * @author
+     * @reason Optimized
+     */
     @Overwrite
     public BlockPos east() {
         return new BlockPos(this.getX() + 1, this.getY(), this.getZ());
     }
 
+    /**
+     * @author
+     * @reason Optimized
+     */
     @Overwrite
     public BlockPos east(int int_1) {
         return new BlockPos(this.getX() + int_1, this.getY(), this.getZ());
     }
 
+    /**
+     * @author
+     * @reason Optimized
+     */
     @Overwrite
     public BlockPos offset(Direction direction_1) {
         switch (direction_1) {

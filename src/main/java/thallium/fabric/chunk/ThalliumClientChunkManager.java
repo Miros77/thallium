@@ -2,12 +2,14 @@ package thallium.fabric.chunk;
 
 import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.ChunkSectionPos;
+import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.biome.source.BiomeArray;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.ChunkStatus;
@@ -15,6 +17,9 @@ import net.minecraft.world.chunk.EmptyChunk;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.chunk.light.LightingProvider;
 
+/**
+ * An implementation of {@link net.minecraft.world.chunk.ChunkManager} that uses a fast HashMap
+ */
 public class ThalliumClientChunkManager extends ClientChunkManager {
 
     private final ClientWorld world;
@@ -23,9 +28,12 @@ public class ThalliumClientChunkManager extends ClientChunkManager {
     private Long2ObjectOpenHashMap<WorldChunk> chunks;
     private int centerX, centerZ, radius;
 
+    private Profiler profiler;
+
     public ThalliumClientChunkManager(ClientWorld world, int renderDistance) {
         super(world, renderDistance);
 
+        this.profiler = MinecraftClient.getInstance().getProfiler();
         this.world = world;
         this.empty = new EmptyChunk(world, new ChunkPos(0, 0));
         this.radius = (Math.max(2, renderDistance) + 3);
@@ -45,6 +53,8 @@ public class ThalliumClientChunkManager extends ClientChunkManager {
 
     @Override
     public WorldChunk loadChunkFromPacket(int x, int z, BiomeArray biomeArray, PacketByteBuf buf, CompoundTag tag, int i, boolean bl) {
+        this.profiler.push("loadChunkFromPacket");
+
         if (notInRadius(x,z))
             return null;
         long key = ChunkPos.toLong(x, z);
@@ -64,6 +74,7 @@ public class ThalliumClientChunkManager extends ClientChunkManager {
             lightingProvider.updateSectionStatus(ChunkSectionPos.from(x,y,z), ChunkSection.isEmpty(sections[y]));
 
         this.world.resetChunkColor(x, z);
+        this.profiler.pop();
         return chunk;
     }
 

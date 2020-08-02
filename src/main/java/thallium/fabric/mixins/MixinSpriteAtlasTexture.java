@@ -32,6 +32,10 @@ public abstract class MixinSpriteAtlasTexture extends AbstractTexture {
     @Final
     private List<Sprite> animatedSprites;
 
+    /**
+     * @author
+     * @reason Optimized
+     */
     @Overwrite
     public void tickAnimatedSprites() {
         MinecraftClient mc = MinecraftClient.getInstance();
@@ -41,17 +45,15 @@ public abstract class MixinSpriteAtlasTexture extends AbstractTexture {
             for (SpriteAtlasTexture texture : ((IChunkData) ((IChunkInfo)renderInfo).getBuiltChunk().data.get()).getVisibleTextures())
                 ((ISprite) texture).markNeedsAnimationUpdate();
 
-        mc.getProfiler().pop();
 
         GlStateManager.bindTexture(getGlId());
         for (Sprite texture : animatedSprites) {
             if (((ISprite) texture).needsAnimationUpdate()) {
-                mc.getProfiler().push(texture.getId().toString());
                 texture.tickAnimation();
                 ((ISprite) texture).unmarkNeedsAnimationUpdate();
-                mc.getProfiler().pop();
             }
         }
+        mc.getProfiler().pop();
     }
 
 }
