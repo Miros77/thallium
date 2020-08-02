@@ -6,7 +6,8 @@
   "mixins": [
     "MixinServerWorld",
     "MixinBlockPos",
-    "MixinWorldChunk"
+    "MixinWorldChunk",
+    "MixinLootableContainerBlockEntity"
   ],
   "client": [
     "MixinMinecraftClient",
