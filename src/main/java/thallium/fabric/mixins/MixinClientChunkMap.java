@@ -1,23 +1,24 @@
 package thallium.fabric.mixins;
 
-import java.util.concurrent.atomic.AtomicReferenceArray;
-
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.client.world.ClientChunkManager.ClientChunkMap;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.WorldChunk;
+import thallium.fabric.chunk.FastChunkMap;
+import thallium.fabric.interfaces.IChunkMap;
 
 @Mixin(ClientChunkMap.class)
-public class MixinClientChunkMap {
+public class MixinClientChunkMap implements IChunkMap {
 
-    @Final
-    @Shadow
-    private AtomicReferenceArray<WorldChunk> chunks;
+    public FastChunkMap fast;
 
     @Final
     @Shadow
@@ -35,36 +36,48 @@ public class MixinClientChunkMap {
     @Shadow
     private int loadedChunkCount;
 
-    @Inject(at = @At("HEAD"), method = "<init>", cancellable = true)
-    public void init(int loadDistance, CallbackInfo ci) {
-        this.radius = loadDistance;
-        this.diameter = loadDistance * 2 + 1;
-        this.chunks = new AtomicReferenceArray<WorldChunk>(this.diameter * this.diameter);
-        ci.cancel(); // We Overwrite the constructor
+    @Inject(at = @At("TAIL"), method = "<init>", cancellable = true)
+    public void init(ClientChunkManager c, int loadDistance, CallbackInfo ci) {
+        if (null == fast)
+            fast = new FastChunkMap(loadDistance);
     }
 
-    @Shadow
-    private int getIndex(int chunkX, int chunkZ) {
-        return 0;
+    @Override
+    public FastChunkMap getFastMap() {
+        return fast;
     }
 
-    @Shadow
-    protected void set(int index, WorldChunk chunk) {
+    @Override
+    public void setFastMap(FastChunkMap fast) {
+        this.fast = fast;
     }
 
-    @Shadow
-    protected WorldChunk compareAndSet(int index, WorldChunk expect, WorldChunk update) {
+    @Overwrite
+    public WorldChunk getChunk(int index) {
+        System.out.println("WARNING CALL TO OLD getChunk");
+        return fast.getChunk(index);
+    }
+
+    @Overwrite
+    public void set(int index, WorldChunk chunk) {
+        fast.set(index, chunk);
+    }
+
+    @Overwrite
+    public WorldChunk compareAndSet(int index, WorldChunk expect, WorldChunk update) {
+        System.out.println("WARNING CALL TO OLD compareAndSet");
         return null;
     }
 
-    @Shadow
-    private boolean isInRadius(int chunkX, int chunkZ) {
-        return false;
+    @Overwrite
+    public int getIndex(int x, int z) {
+        System.out.println("WARNING CALL TO OLD getIndex");
+        return (int) ChunkPos.toLong(x, z);
     }
 
-    @Shadow
-    protected WorldChunk getChunk(int index) {
-        return null;
+    @Override
+    public boolean inRadius(int chunkX, int chunkZ) {
+        return Math.abs(chunkX - this.centerChunkX) <= this.radius && Math.abs(chunkZ - this.centerChunkZ) <= this.radius;
     }
 
 }

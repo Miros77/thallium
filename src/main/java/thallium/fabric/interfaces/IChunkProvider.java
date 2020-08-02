@@ -1,9 +1,9 @@
 package thallium.fabric.interfaces;
 
-import net.minecraft.client.world.ClientWorld;
+import net.minecraft.world.BlockView;
 
 public interface IChunkProvider {
 
-    public ClientWorld getWorld();
+    public BlockView getWorld();
 
 }

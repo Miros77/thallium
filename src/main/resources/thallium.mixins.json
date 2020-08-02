@@ -18,7 +18,9 @@
     "MixinChunkInfo",
     "MixinSpriteAtlasTexture",
     "MixinSprite",
-    "MixinMathHelper"
+    "MixinMathHelper",
+    "MixinClientChunkMap",
+    "MixinClientChunkManager"
   ],
   "injectors": {
     "defaultRequire": 1
