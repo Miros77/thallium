@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import thallium.fabric.ThalliumMod;
+import thallium.fabric.gui.ThalliumOptions;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.options.CloudRenderMode;
 import net.minecraft.client.options.GameOptions;
@@ -35,14 +36,19 @@ public class MixinMinecraftClient {
     public void renderTail(boolean tick, CallbackInfo ci) {
         fpsUpdate(); // Start F3 debug menu update
 
+        if (!ThalliumOptions.renderSkip) {
+            a++;
+            return;
+        }
+
         long took = System.currentTimeMillis();
-        int skip = 55;
-        if (currentFps > 400) skip = 50;
+        int skip = 60;
+        if (currentFps > 420) skip = 50;
         if (currentFps > 500) skip = 40;
         if (currentFps > 600) skip = 30;
 
         // Thallium_Mod
-        // If FPS is low, lower amount of processing to help get FPS back up.
+        // This is pretty much disabled now
         if (took - last > skip) {
             ThalliumMod.doUpdate = true;
             last = took;
@@ -66,7 +72,7 @@ public class MixinMinecraftClient {
                 if (currentTime - lastFpsUpdateTime >= 1000) {
                     lastFpsUpdateTime = currentTime;
                     currentFps = this.fpsCounter;
-                    this.fpsDebugString = String.format("%d fps @" + (a + "," + b) + " T: %s%s%s%s B: %d. +Thallium", currentFps, (double)this.options.maxFps == Option.FRAMERATE_LIMIT.getMax() ? "inf" : Integer.valueOf(this.options.maxFps), this.options.enableVsync ? " vsync" : "", this.options.graphicsMode.toString(), this.options.cloudRenderMode == CloudRenderMode.OFF ? "" : (this.options.cloudRenderMode == CloudRenderMode.FAST ? " fast-clouds" : " fancy-clouds"), this.options.biomeBlendRadius);
+                    this.fpsDebugString = String.format("%d fps @" + (a + "a," + b + "b") + " T: %s%s%s%s B: %d. +Thallium", currentFps, (double)this.options.maxFps == Option.FRAMERATE_LIMIT.getMax() ? "inf" : Integer.valueOf(this.options.maxFps), this.options.enableVsync ? " vsync" : "", this.options.graphicsMode.toString(), this.options.cloudRenderMode == CloudRenderMode.OFF ? "" : (this.options.cloudRenderMode == CloudRenderMode.FAST ? " fast-clouds" : " fancy-clouds"), this.options.biomeBlendRadius);
                     this.fpsCounter = 0;
                     this.a = 0;
                     this.b = 0;
