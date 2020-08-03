@@ -78,6 +78,7 @@ public abstract class MixinClientChunkManager extends ChunkManager implements IC
     /**
      * Replace instance of AtomicReference.
      */
+    @Overwrite
     public WorldChunk loadChunkFromPacket(int x, int z, BiomeArray biomes, PacketByteBuf buf, CompoundTag tag, int i, boolean bl) {
         if (null == fastMap) fastMap = ((IChunkMap)this.chunks).getFastMap();
         long j = fastMap.getIndex(x, z);
