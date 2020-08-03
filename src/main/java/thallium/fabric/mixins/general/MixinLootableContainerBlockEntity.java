@@ -1,4 +1,4 @@
-package thallium.fabric.mixins;
+package thallium.fabric.mixins.general;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;

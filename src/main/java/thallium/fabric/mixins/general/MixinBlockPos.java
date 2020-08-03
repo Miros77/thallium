@@ -1,4 +1,4 @@
-package thallium.fabric.mixins;
+package thallium.fabric.mixins.general;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;

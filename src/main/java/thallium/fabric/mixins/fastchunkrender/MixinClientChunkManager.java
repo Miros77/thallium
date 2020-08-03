@@ -1,4 +1,4 @@
-package thallium.fabric.mixins;
+package thallium.fabric.mixins.fastchunkrender;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

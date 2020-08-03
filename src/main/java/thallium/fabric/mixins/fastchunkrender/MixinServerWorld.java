@@ -1,4 +1,4 @@
-package thallium.fabric.mixins;
+package thallium.fabric.mixins.fastchunkrender;
 
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;

@@ -1,4 +1,4 @@
-package thallium.fabric.mixins;
+package thallium.fabric.mixins.old;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -48,7 +48,7 @@ public class MixinMinecraftClient {
             last = took;
             a++;
         } else {
-            ThalliumMod.doUpdate = c == 0 || a <= 60 || a*2 < b;
+            ThalliumMod.doUpdate = c == 0 || a <= 60 || a/2 < b;
             if (ThalliumMod.doUpdate) a++; else b++;
             if (c > 200) c = 0; else c++;
         }
@@ -66,7 +66,7 @@ public class MixinMinecraftClient {
                 if (currentTime - lastFpsUpdateTime >= 1000) {
                     lastFpsUpdateTime = currentTime;
                     currentFps = this.fpsCounter;
-                    this.fpsDebugString = String.format("%d fps @" + (a/10 + "," + b/10) + " T: %s%s%s%s B: %d. +Thallium", currentFps, (double)this.options.maxFps == Option.FRAMERATE_LIMIT.getMax() ? "inf" : Integer.valueOf(this.options.maxFps), this.options.enableVsync ? " vsync" : "", this.options.graphicsMode.toString(), this.options.cloudRenderMode == CloudRenderMode.OFF ? "" : (this.options.cloudRenderMode == CloudRenderMode.FAST ? " fast-clouds" : " fancy-clouds"), this.options.biomeBlendRadius);
+                    this.fpsDebugString = String.format("%d fps @" + (a + "," + b) + " T: %s%s%s%s B: %d. +Thallium", currentFps, (double)this.options.maxFps == Option.FRAMERATE_LIMIT.getMax() ? "inf" : Integer.valueOf(this.options.maxFps), this.options.enableVsync ? " vsync" : "", this.options.graphicsMode.toString(), this.options.cloudRenderMode == CloudRenderMode.OFF ? "" : (this.options.cloudRenderMode == CloudRenderMode.FAST ? " fast-clouds" : " fancy-clouds"), this.options.biomeBlendRadius);
                     this.fpsCounter = 0;
                     this.a = 0;
                     this.b = 0;

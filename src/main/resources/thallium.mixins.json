@@ -4,23 +4,21 @@
   "package": "thallium.fabric.mixins",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "MixinServerWorld",
-    "MixinBlockPos",
-    "MixinWorldChunk",
-    "MixinLootableContainerBlockEntity"
+    "fastchunkrender.MixinServerWorld",
+    "general.MixinBlockPos",
+    "general.MixinLootableContainerBlockEntity"
   ],
   "client": [
-    "MixinMinecraftClient",
-    "MixinGameRenderer",
-    "MixinClientWorld",
-    "MixinWorldRenderer",
-    "MixinChunkData",
-    "MixinChunkInfo",
-    "MixinSpriteAtlasTexture",
-    "MixinSprite",
-    "MixinMathHelper",
-    "MixinClientChunkMap",
-    "MixinClientChunkManager"
+    "old.MixinMinecraftClient",
+    "old.MixinGameRenderer",
+    "animations.MixinWorldRenderer",
+    "animations.MixinChunkData",
+    "animations.MixinChunkInfo",
+    "animations.MixinSpriteAtlasTexture",
+    "animations.MixinSprite",
+    "fastmath.MixinMathHelper",
+    "fastchunkrender.MixinClientChunkMap",
+    "fastchunkrender.MixinClientChunkManager"
   ],
   "injectors": {
     "defaultRequire": 1

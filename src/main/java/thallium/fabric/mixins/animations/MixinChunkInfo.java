@@ -1,4 +1,4 @@
-package thallium.fabric.mixins;
+package thallium.fabric.mixins.animations;
 
 import java.util.concurrent.atomic.AtomicReference;
 
