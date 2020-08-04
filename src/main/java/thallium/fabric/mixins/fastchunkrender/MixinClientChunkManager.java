@@ -4,6 +4,10 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.client.world.ClientChunkManager.ClientChunkMap;
@@ -22,10 +26,11 @@ import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.chunk.light.LightingProvider;
 import thallium.fabric.ThalliumMod;
 import thallium.fabric.chunk.FastChunkMap;
+import thallium.fabric.gui.ThalliumOptions;
 import thallium.fabric.interfaces.IChunkMap;
 import thallium.fabric.interfaces.IChunkProvider;
 
-@Mixin(ClientChunkManager.class)
+@Mixin(value = ClientChunkManager.class, priority=99) // priority=99 to allow Fabric API
 public abstract class MixinClientChunkManager extends ChunkManager implements IChunkProvider {
 
     @Shadow
@@ -41,16 +46,29 @@ public abstract class MixinClientChunkManager extends ChunkManager implements IC
     @Shadow
     public static boolean positionEquals(WorldChunk chunk, int x, int y) {throw new IllegalArgumentException("Mixin Stub");}
 
-    public FastChunkMap fastMap;
+    private int loadDistance;
 
-    @Overwrite
-    public void unload(int x, int z) {
-        ((IChunkMap)this.chunks).getFastMap().unload(x, z);
+    private FastChunkMap fastMap() {
+        return ((IChunkMap)this.chunks).getFastMap();
     }
 
-    @Override
-    public String getDebugString() {
-        return "ThalliumChunkManager: " + ((IChunkMap)this.chunks).getFastMap().fastChunks.size();
+    @Inject(at = @At("TAIL"), method = "<init>")
+    public void init(ClientWorld w, int loadDistance, CallbackInfo ci) {
+        this.loadDistance = loadDistance;
+    }
+
+    @Inject(at = @At("HEAD"), method = "unload", cancellable = true)
+    public void unload(int x, int z, CallbackInfo ci) {
+        if (ThalliumOptions.useFastRenderer) {
+            ((IChunkMap)this.chunks).getFastMap().unload(x, z);
+            ci.cancel();
+        }
+    }
+
+    @Inject(at = @At("HEAD"), method = "getDebugString", cancellable = true)
+    public void getDebugStringThallium(CallbackInfoReturnable<String> ci) {
+        if (ThalliumOptions.useFastRenderer)
+            ci.setReturnValue("ThalliumChunkManager: " + ((IChunkMap)this.chunks).getFastMap().fastChunks.size());
     }
 
     @Override
@@ -61,59 +79,75 @@ public abstract class MixinClientChunkManager extends ChunkManager implements IC
     /**
      * Replace instances of ClientChunkMap in the vanilla method with our FastChunkMap
      */
-    @Overwrite
-    public void updateLoadDistance(int loadDistance) {
-        int i = ((IChunkMap)this.chunks).getFastMap().radius;
-        if (i != (Math.max(2, loadDistance) + 3)) {
-            FastChunkMap clientChunkMap = new FastChunkMap(Math.max(2, loadDistance) + 3);
+    @Inject(at = @At("HEAD"), method = "updateLoadDistance", cancellable = true)
+    public void updateLoadDistanceFast(int loadDistance, CallbackInfo ci) {
+        this.loadDistance = loadDistance;
+        if (ThalliumOptions.useFastRenderer) {
+            FastChunkMap clientChunkMap = new FastChunkMap(Math.max(2, loadDistance) + 3, (ClientChunkManager)(Object)this);
             ((IChunkMap)this.chunks).getFastMap().fastChunks.forEach((longKey,worldChunk) -> {
                 if (((IChunkMap)this.chunks).inRadius(ChunkPos.getPackedX(longKey), ChunkPos.getPackedZ(longKey)))
                     clientChunkMap.set(longKey, worldChunk);
             });
             ((IChunkMap)this.chunks).setFastMap(clientChunkMap);
-            fastMap = ((IChunkMap)this.chunks).getFastMap();
+            ci.cancel();
         }
     }
 
     /**
      * Replace instance of AtomicReference.
      */
-    @Overwrite
-    public WorldChunk loadChunkFromPacket(int x, int z, BiomeArray biomes, PacketByteBuf buf, CompoundTag tag, int i, boolean bl) {
-        if (null == fastMap) fastMap = ((IChunkMap)this.chunks).getFastMap();
-        long j = fastMap.getIndex(x, z);
-        WorldChunk worldChunk = (WorldChunk)fastMap.getChunk(j); // ThalliumMod - Replace vanilla AtomicReference call
-        if (bl || !positionEquals(worldChunk, x, z)) {
-            if (biomes == null) {
-                ThalliumMod.LOGGER.warn("Ignoring chunk since we don't have complete data: {}, {}", x, z);
-                return null;
+    @Inject(at = @At("HEAD"), method = "loadChunkFromPacket", cancellable = true)
+    public void loadChunkFromPacketFast(int x, int z, BiomeArray biomes, PacketByteBuf buf, CompoundTag tag, int i, boolean bl, CallbackInfoReturnable<WorldChunk> ci) {
+        if (ThalliumOptions.useFastRenderer) {
+            long j = fastMap().getIndex(x, z);
+            WorldChunk worldChunk = (WorldChunk)fastMap().getChunk(j); // ThalliumMod - Replace vanilla AtomicReference call
+            if (bl || !positionEquals(worldChunk, x, z)) {
+                if (biomes == null) {
+                    ThalliumMod.LOGGER.warn("Ignoring chunk since we don't have complete data: {}, {}", x, z);
+                    ci.setReturnValue(null);
+                }
+                worldChunk = new WorldChunk(this.world, new ChunkPos(x, z), biomes);
+                worldChunk.loadFromPacket(biomes, buf, tag, i);
+            } else worldChunk.loadFromPacket(biomes, buf, tag, i);
+            fastMap().set(j, worldChunk);
+    
+            ChunkSection[] chunkSections = worldChunk.getSectionArray();
+            LightingProvider lightingProvider = this.getLightingProvider();
+            lightingProvider.setLightEnabled(new ChunkPos(x, z), true);
+            for (int k = 0; k < chunkSections.length; ++k) {
+                ChunkSection chunkSection = chunkSections[k];
+                lightingProvider.updateSectionStatus(ChunkSectionPos.from(x, k, z), ChunkSection.isEmpty(chunkSection));
             }
-            worldChunk = new WorldChunk(this.world, new ChunkPos(x, z), biomes);
-            worldChunk.loadFromPacket(biomes, buf, tag, i);
-            fastMap.set(j, worldChunk);
-        } else worldChunk.loadFromPacket(biomes, buf, tag, i);
-
-        ChunkSection[] chunkSections = worldChunk.getSectionArray();
-        LightingProvider lightingProvider = this.getLightingProvider();
-        lightingProvider.setLightEnabled(new ChunkPos(x, z), true);
-        for (int k = 0; k < chunkSections.length; ++k) {
-            ChunkSection chunkSection = chunkSections[k];
-            lightingProvider.updateSectionStatus(ChunkSectionPos.from(x, k, z), ChunkSection.isEmpty(chunkSection));
+            this.world.resetChunkColor(x, z);
+            ci.setReturnValue(worldChunk);
         }
-        this.world.resetChunkColor(x, z);
-        return worldChunk;
+    }
+
+    //@Inject(at = @At("HEAD"), method = "getChunk", cancellable = true)
+    @Override
+    @Overwrite
+    public Chunk getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
+        if (ThalliumOptions.useFastRenderer) {
+            WorldChunk worldChunk = fastMap().getChunk(ChunkPos.toLong(i, j));
+            if (((IChunkMap)this.chunks).inRadius(i, j) && positionEquals(worldChunk, i, j))
+                return worldChunk;
+            return (bl ? this.emptyChunk : null);
+        } else {
+            System.out.println(this.loadDistance);
+            int diameter = loadDistance * 2 + 1;
+            int abc = Math.floorMod(j, diameter) * diameter + Math.floorMod(i, diameter);
+            WorldChunk worldChunk = ((IChunkMap)this.chunks).getChunkByIndex(abc);
+            if (((IChunkMap)this.chunks).inRadius(i, j) && positionEquals(worldChunk, i, j))
+                return worldChunk;
+            if (bl)
+                return this.emptyChunk;
+            return null;
+        }
     }
 
     @Override
-    public Chunk getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
-        if (null == fastMap) fastMap = ((IChunkMap)this.chunks).getFastMap();
-        WorldChunk worldChunk;
-        if (((IChunkMap)this.chunks).inRadius(i, j) && positionEquals(worldChunk = fastMap.getChunk(ChunkPos.toLong(i, j)), i, j))
-            return worldChunk;
-
-        if (bl) return this.emptyChunk;
-
-        return null;
+    public void refreshRender() {
+        ((ClientChunkManager)(Object)this).updateLoadDistance(this.loadDistance);
     }
 
 }

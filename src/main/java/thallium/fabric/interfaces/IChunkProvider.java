@@ -6,4 +6,6 @@ public interface IChunkProvider {
 
     public BlockView getWorld();
 
+    public void refreshRender();
+
 }

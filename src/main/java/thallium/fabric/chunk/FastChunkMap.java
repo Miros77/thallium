@@ -1,7 +1,10 @@
 package thallium.fabric.chunk;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.minecraft.client.world.ClientChunkManager;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
 
 /**
@@ -20,9 +23,12 @@ public class FastChunkMap {
 
     public int loadedChunkCount;
 
-    public FastChunkMap(int loadDistance) {
+    public World world;
+
+    public FastChunkMap(int loadDistance, ClientChunkManager c) {
         this.radius = loadDistance;
-        this.diameter = loadDistance * 2 + 1;
+        this.diameter = (loadDistance * 2) + 1;
+        this.world = (World) c.getWorld();
         this.fastChunks = new Long2ObjectOpenHashMap<>(this.diameter ^ 2);
     }
 
@@ -32,9 +38,11 @@ public class FastChunkMap {
 
     public void set(long index, WorldChunk chunk) {
         WorldChunk worldChunk = this.fastChunks.put(index, chunk);
-        if (worldChunk != null) {
+       if (worldChunk != null) {
             --this.loadedChunkCount;
-            //((ClientWorld)((IChunkProvider)(Object)this).getWorld()).unloadBlockEntities(worldChunk);
+            ((ClientWorld)world).unloadBlockEntities(worldChunk);
+        } else {
+            this.loadedChunkCount++;
         }
     }
 
@@ -43,7 +51,7 @@ public class FastChunkMap {
     }
 
     public void unload(int x, int z) {
-        this.fastChunks.remove(ChunkPos.toLong(x, z));
+        WorldChunk worldChunk = this.fastChunks.remove(ChunkPos.toLong(x, z));
     }
 
 }

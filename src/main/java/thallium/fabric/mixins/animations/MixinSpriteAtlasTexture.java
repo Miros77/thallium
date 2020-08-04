@@ -6,6 +6,9 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 
@@ -13,6 +16,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
+import thallium.fabric.gui.ThalliumOptions;
 import thallium.fabric.interfaces.IChunkData;
 import thallium.fabric.interfaces.IChunkInfo;
 import thallium.fabric.interfaces.ISprite;
@@ -36,24 +40,27 @@ public abstract class MixinSpriteAtlasTexture extends AbstractTexture {
      * @author
      * @reason Optimized
      */
-    @Overwrite
-    public void tickAnimatedSprites() {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        mc.getProfiler().push("determineVisibleTextures");
-
-        for (net.minecraft.client.render.WorldRenderer.ChunkInfo renderInfo : ((IWorldRenderer)mc.worldRenderer).getChunkInfo())
-            for (SpriteAtlasTexture texture : ((IChunkData) ((IChunkInfo)renderInfo).getBuiltChunk().data.get()).getVisibleTextures())
-                ((ISprite) texture).markNeedsAnimationUpdate();
-
-
-        GlStateManager.bindTexture(getGlId());
-        for (Sprite texture : animatedSprites) {
-            if (((ISprite) texture).needsAnimationUpdate()) {
-                texture.tickAnimation();
-                ((ISprite) texture).unmarkNeedsAnimationUpdate();
+    @Inject(at = @At("HEAD"), method = "tickAnimatedSprites", cancellable = true)
+    public void optimizedtickAnimatedSprites(CallbackInfo ci) {
+        if (ThalliumOptions.optimizeAnimations) {
+            MinecraftClient mc = MinecraftClient.getInstance();
+            mc.getProfiler().push("determineVisibleTextures");
+    
+            for (net.minecraft.client.render.WorldRenderer.ChunkInfo renderInfo : ((IWorldRenderer)mc.worldRenderer).getChunkInfo())
+                for (SpriteAtlasTexture texture : ((IChunkData) ((IChunkInfo)renderInfo).getBuiltChunk().data.get()).getVisibleTextures())
+                    ((ISprite) texture).markNeedsAnimationUpdate();
+    
+    
+            GlStateManager.bindTexture(getGlId());
+            for (Sprite texture : animatedSprites) {
+                if (((ISprite) texture).needsAnimationUpdate()) {
+                    texture.tickAnimation();
+                    ((ISprite) texture).unmarkNeedsAnimationUpdate();
+                }
             }
+            mc.getProfiler().pop();
+            ci.cancel();
         }
-        mc.getProfiler().pop();
     }
 
 }

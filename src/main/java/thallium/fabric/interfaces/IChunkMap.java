@@ -1,5 +1,6 @@
 package thallium.fabric.interfaces;
 
+import net.minecraft.world.chunk.WorldChunk;
 import thallium.fabric.chunk.FastChunkMap;
 
 public interface IChunkMap {
@@ -9,5 +10,9 @@ public interface IChunkMap {
     public void setFastMap(FastChunkMap fast);
 
     public boolean inRadius(int x, int z);
+
+    public WorldChunk getChunkByIndex(int index);
+
+   // public int getIndex(int i, int j);
 
 }
