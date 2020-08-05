@@ -51,7 +51,7 @@ public class FastChunkMap {
     }
 
     public void unload(int x, int z) {
-        WorldChunk worldChunk = this.fastChunks.remove(ChunkPos.toLong(x, z));
+        this.fastChunks.remove(ChunkPos.toLong(x, z));
     }
 
 }

@@ -6,8 +6,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 import net.minecraft.client.options.BooleanOption;
+import net.minecraft.client.options.CyclingOption;
+import net.minecraft.client.options.GameOptions;
+import net.minecraft.text.Text;
 import thallium.fabric.ThalliumMod;
 
 public class ThalliumOptions {
@@ -16,6 +21,7 @@ public class ThalliumOptions {
     public static boolean useFastMath        = true;
     public static boolean optimizeAnimations = true;
     public static boolean renderSkip         = true;
+    public static EnumDirectionalRendering directionalRender = EnumDirectionalRendering.NORMAL;
 
     public static final BooleanOption FAST_RENDER = new BooleanOption("Use fast renderer", gameOptions -> useFastRenderer, (gameOptions, boolean_) -> {
         useFastRenderer = true; // TODO: Fix problems with disabling fast render
@@ -37,6 +43,16 @@ public class ThalliumOptions {
         save();
     });
 
+    public static CyclingOption DIRECTIONAL_RENDER;
+
+    public static void init() {
+        BiConsumer<GameOptions, Integer> a = (options,integer) -> {
+            directionalRender = directionalRender.getNext();
+            save();
+        };
+        BiFunction<GameOptions, CyclingOption, Text> b = (options,cyc) -> { return cyc.getDisplayPrefix().append(directionalRender.name()); };
+        DIRECTIONAL_RENDER = new CyclingOption("Directional Render", a, b);
+    }
 
     @SuppressWarnings("unchecked")
     public static void load() {
@@ -57,6 +73,8 @@ public class ThalliumOptions {
                     optimizeAnimations = Boolean.valueOf(key);
                 if (str.equals("renderSkip"))
                     renderSkip = Boolean.valueOf(key);
+                if (str.equals("directionalRender"))
+                    directionalRender = EnumDirectionalRendering.values()[Integer.valueOf(key)];
             }
             ois.close();
         } catch (IOException | ClassNotFoundException e) {
@@ -76,6 +94,7 @@ public class ThalliumOptions {
             map.put("fastmath",           "" + useFastMath);
             map.put("optimizeAnimations", "" + optimizeAnimations);
             map.put("renderSkip",         "" + renderSkip);
+            map.put("directionalRender",  "" + directionalRender.ordinal());
 
             ThalliumMod.saveFile.createNewFile();
             FileOutputStream fos = new FileOutputStream(ThalliumMod.saveFile);

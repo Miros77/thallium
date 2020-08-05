@@ -13,9 +13,11 @@ public class ThalliumUpdateCheck {
 
     private static boolean outdated;
     private static boolean checked;
+    public static String current;
 
     public static boolean check(ThalliumMod instance) {
         if (checked) return outdated;
+        current = "CURRENT_VERSION";
         HttpURLConnection httpurlconnection = null;
 
         try {
@@ -35,6 +37,7 @@ public class ThalliumUpdateCheck {
                 String displayName = (displayName = str.substring(str.indexOf("displayName\":"))).substring(14, displayName.indexOf("\","));
 
                 String cur = toString(instance.getClass().getClassLoader().getResourceAsStream("thallium_version.txt"));
+                current = cur;
                 outdated = isOutdated(cur, displayName);
                 checked = true;
             } finally {

@@ -8,9 +8,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.client.world.ClientChunkManager.ClientChunkMap;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.chunk.WorldChunk;
 import thallium.fabric.chunk.FastChunkMap;
 import thallium.fabric.gui.ThalliumOptions;
@@ -79,9 +82,44 @@ public class MixinClientChunkMap implements IChunkMap {
             ci.setReturnValue((int) ChunkPos.toLong(x, z));
     }
 
+    private ClientPlayerEntity player;
+
     @Override
     public boolean inRadius(int chunkX, int chunkZ) {
-        return Math.abs(chunkX - this.centerChunkX) <= this.radius && Math.abs(chunkZ - this.centerChunkZ) <= this.radius;
+        if (null == this.player)
+            player = MinecraftClient.getInstance().player;
+
+        // NORTH = -z | SOUTH = +z
+        // EAST  = +x | WEST  = -x
+        boolean vanilla = Math.abs(chunkX - this.centerChunkX) <= this.radius && Math.abs(chunkZ - this.centerChunkZ) <= this.radius;
+        if (!vanilla) return false;
+
+        int offset = ThalliumOptions.directionalRender.level;
+        if (offset == -1)
+            return vanilla;
+
+        Direction FACING = player.getHorizontalFacing();
+        switch (FACING) {
+            case NORTH:
+                if (chunkZ-offset > this.centerChunkZ)
+                    return false;
+                break;
+            case SOUTH:
+                if (chunkZ+offset < this.centerChunkZ)
+                    return false;
+                break;
+            case EAST:
+                if (chunkX+offset < this.centerChunkX)
+                    return false;
+                break;
+            case WEST:
+                if (chunkX-offset > this.centerChunkX)
+                    return false;
+                break;
+            default:
+                return vanilla;
+        }
+        return vanilla;
     }
 
     @Shadow

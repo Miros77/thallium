@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.client.world.ClientChunkManager.ClientChunkMap;
 import net.minecraft.client.world.ClientWorld;
@@ -16,6 +17,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.ChunkSectionPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.biome.source.BiomeArray;
 import net.minecraft.world.chunk.Chunk;
@@ -63,6 +65,18 @@ public abstract class MixinClientChunkManager extends ChunkManager implements IC
             ((IChunkMap)this.chunks).getFastMap().unload(x, z);
             ci.cancel();
         }
+    }
+
+    @Inject(at = @At("HEAD"), method = "setChunkMapCenter")
+    public void setCenter(int x, int z, CallbackInfo ci) {
+        System.out.println(x + "," +  z);
+        Direction dir = MinecraftClient.getInstance().player.getHorizontalFacing();
+        System.out.println(dir.asString());
+
+        // NORTH = -z
+        // WEST  = -x
+        // SOUTH = +z
+        // EAST  = +z
     }
 
     @Inject(at = @At("HEAD"), method = "getDebugString", cancellable = true)
@@ -123,7 +137,6 @@ public abstract class MixinClientChunkManager extends ChunkManager implements IC
         }
     }
 
-    //@Inject(at = @At("HEAD"), method = "getChunk", cancellable = true)
     @Override
     @Overwrite
     public Chunk getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
@@ -139,9 +152,7 @@ public abstract class MixinClientChunkManager extends ChunkManager implements IC
             WorldChunk worldChunk = ((IChunkMap)this.chunks).getChunkByIndex(abc);
             if (((IChunkMap)this.chunks).inRadius(i, j) && positionEquals(worldChunk, i, j))
                 return worldChunk;
-            if (bl)
-                return this.emptyChunk;
-            return null;
+            return bl ? this.emptyChunk : null;
         }
     }
 

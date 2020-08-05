@@ -11,7 +11,6 @@ import thallium.fabric.gui.ThalliumOptions;
 
 public class ThalliumMod implements ModInitializer {
 
-    public static String VERSION = "${version}";
     public static Logger LOGGER = LogManager.getLogger("Thallium");
 
     public static boolean doUpdate = false;
@@ -19,14 +18,17 @@ public class ThalliumMod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-        LOGGER.info("Thallium " + VERSION + " Enabled.");
+	    boolean outdated = ThalliumUpdateCheck.check(this);
+
+        LOGGER.info("Thallium " + ThalliumUpdateCheck.current + " Enabled.");
+        ThalliumOptions.init();
 
         saveFile = new File(FabricLoader.getInstance().getConfigDirectory(), "thallium-options.dat");
         if (saveFile.exists())
             ThalliumOptions.load();
         ThalliumOptions.save();
 
-        if (ThalliumUpdateCheck.check(this))
+        if (outdated)
             LOGGER.info("Outdated Thallium! For the latest updates please redownload Thallium from CurseForge!");
     }
 
