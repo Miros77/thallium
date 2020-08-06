@@ -19,7 +19,7 @@ import net.minecraft.text.StringRenderable;
 public class ThalliumOptionsScreen extends Screen {
 
     private static final Option[] OPTIONS = new Option[]{ThalliumOptions.FAST_RENDER, ThalliumOptions.FAST_MATH, ThalliumOptions.OPTIMIZE_ANIMATIONS,
-            ThalliumOptions.RENDER_SKIP, ThalliumOptions.DIRECTIONAL_RENDER};
+            ThalliumOptions.RENDER_SKIP, ThalliumOptions.DIRECTIONAL_RENDER, ThalliumOptions.FAST_MATH_TYPE};
 
     private List<StringRenderable> field_25453;
     private ButtonListWidget list;

@@ -46,10 +46,6 @@ public class FastChunkMap {
         }
     }
 
-    public long getIndex(int x, int z) {
-        return ChunkPos.toLong(x, z);
-    }
-
     public void unload(int x, int z) {
         this.fastChunks.remove(ChunkPos.toLong(x, z));
     }

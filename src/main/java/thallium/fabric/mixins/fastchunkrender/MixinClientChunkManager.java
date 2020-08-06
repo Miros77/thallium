@@ -9,7 +9,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.client.world.ClientChunkManager.ClientChunkMap;
 import net.minecraft.client.world.ClientWorld;
@@ -17,7 +16,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.biome.source.BiomeArray;
 import net.minecraft.world.chunk.Chunk;
@@ -67,18 +65,6 @@ public abstract class MixinClientChunkManager extends ChunkManager implements IC
         }
     }
 
-    @Inject(at = @At("HEAD"), method = "setChunkMapCenter")
-    public void setCenter(int x, int z, CallbackInfo ci) {
-        System.out.println(x + "," +  z);
-        Direction dir = MinecraftClient.getInstance().player.getHorizontalFacing();
-        System.out.println(dir.asString());
-
-        // NORTH = -z
-        // WEST  = -x
-        // SOUTH = +z
-        // EAST  = +z
-    }
-
     @Inject(at = @At("HEAD"), method = "getDebugString", cancellable = true)
     public void getDebugStringThallium(CallbackInfoReturnable<String> ci) {
         if (ThalliumOptions.useFastRenderer)
@@ -113,7 +99,7 @@ public abstract class MixinClientChunkManager extends ChunkManager implements IC
     @Inject(at = @At("HEAD"), method = "loadChunkFromPacket", cancellable = true)
     public void loadChunkFromPacketFast(int x, int z, BiomeArray biomes, PacketByteBuf buf, CompoundTag tag, int i, boolean bl, CallbackInfoReturnable<WorldChunk> ci) {
         if (ThalliumOptions.useFastRenderer) {
-            long j = fastMap().getIndex(x, z);
+            long j = ChunkPos.toLong(x, z);
             WorldChunk worldChunk = (WorldChunk)fastMap().getChunk(j); // ThalliumMod - Replace vanilla AtomicReference call
             if (bl || !positionEquals(worldChunk, x, z)) {
                 if (biomes == null) {
@@ -125,6 +111,7 @@ public abstract class MixinClientChunkManager extends ChunkManager implements IC
             } else worldChunk.loadFromPacket(biomes, buf, tag, i);
             fastMap().set(j, worldChunk);
     
+            // copied from vanilla
             ChunkSection[] chunkSections = worldChunk.getSectionArray();
             LightingProvider lightingProvider = this.getLightingProvider();
             lightingProvider.setLightEnabled(new ChunkPos(x, z), true);
@@ -146,7 +133,6 @@ public abstract class MixinClientChunkManager extends ChunkManager implements IC
                 return worldChunk;
             return (bl ? this.emptyChunk : null);
         } else {
-            System.out.println(this.loadDistance);
             int diameter = loadDistance * 2 + 1;
             int abc = Math.floorMod(j, diameter) * diameter + Math.floorMod(i, diameter);
             WorldChunk worldChunk = ((IChunkMap)this.chunks).getChunkByIndex(abc);

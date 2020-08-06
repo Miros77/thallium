@@ -14,6 +14,7 @@ import net.minecraft.client.options.CyclingOption;
 import net.minecraft.client.options.GameOptions;
 import net.minecraft.text.Text;
 import thallium.fabric.ThalliumMod;
+import thallium.fabric.math.FastMathType;
 
 public class ThalliumOptions {
 
@@ -21,7 +22,9 @@ public class ThalliumOptions {
     public static boolean useFastMath        = true;
     public static boolean optimizeAnimations = true;
     public static boolean renderSkip         = true;
+
     public static EnumDirectionalRendering directionalRender = EnumDirectionalRendering.NORMAL;
+    public static FastMathType fastMathType = FastMathType.RIVEN;
 
     public static final BooleanOption FAST_RENDER = new BooleanOption("Use fast renderer", gameOptions -> useFastRenderer, (gameOptions, boolean_) -> {
         useFastRenderer = true; // TODO: Fix problems with disabling fast render
@@ -44,6 +47,7 @@ public class ThalliumOptions {
     });
 
     public static CyclingOption DIRECTIONAL_RENDER;
+    public static CyclingOption FAST_MATH_TYPE;
 
     public static void init() {
         BiConsumer<GameOptions, Integer> a = (options,integer) -> {
@@ -52,6 +56,15 @@ public class ThalliumOptions {
         };
         BiFunction<GameOptions, CyclingOption, Text> b = (options,cyc) -> { return cyc.getDisplayPrefix().append(directionalRender.name()); };
         DIRECTIONAL_RENDER = new CyclingOption("Directional Render", a, b);
+
+        BiConsumer<GameOptions, Integer> c = (options,integer) -> {
+            fastMathType = fastMathType.getNext();
+            save();
+        };
+        BiFunction<GameOptions, CyclingOption, Text> d = (options,cyc) -> { 
+            return cyc.getDisplayPrefix().append(useFastMath ? fastMathType.name() : "Fast Math OFF");
+        };
+        FAST_MATH_TYPE = new CyclingOption("Math Algorithm", c, d);
     }
 
     @SuppressWarnings("unchecked")
@@ -75,6 +88,8 @@ public class ThalliumOptions {
                     renderSkip = Boolean.valueOf(key);
                 if (str.equals("directionalRender"))
                     directionalRender = EnumDirectionalRendering.values()[Integer.valueOf(key)];
+                if (str.equals("fastMathType"))
+                    directionalRender = EnumDirectionalRendering.values()[Integer.valueOf(key)];
             }
             ois.close();
         } catch (IOException | ClassNotFoundException e) {
@@ -95,6 +110,7 @@ public class ThalliumOptions {
             map.put("optimizeAnimations", "" + optimizeAnimations);
             map.put("renderSkip",         "" + renderSkip);
             map.put("directionalRender",  "" + directionalRender.ordinal());
+            map.put("fastMathType",       "" + fastMathType.ordinal());
 
             ThalliumMod.saveFile.createNewFile();
             FileOutputStream fos = new FileOutputStream(ThalliumMod.saveFile);
