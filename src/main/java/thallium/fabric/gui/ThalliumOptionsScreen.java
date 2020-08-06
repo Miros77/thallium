@@ -47,18 +47,6 @@ public class ThalliumOptionsScreen extends Screen {
     }
 
     @Override
-    public void removed() {
-        super.removed();
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (super.mouseClicked(mouseX, mouseY, button))
-            return true;
-        return false;
-    }
-
-    @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (super.mouseReleased(mouseX, mouseY, button))
             return true;
@@ -73,17 +61,14 @@ public class ThalliumOptionsScreen extends Screen {
         Optional<AbstractButtonWidget> optional = this.list.getHoveredButton(mouseX, mouseY);
         if (optional.isPresent() && optional.get() instanceof OptionButtonWidget) {
             Optional<List<StringRenderable>> optional2 = ((OptionButtonWidget)optional.get()).getOption().getTooltip();
-            optional2.ifPresent(list -> {
-                this.field_25453 = list;
-            });
+            optional2.ifPresent(list -> this.field_25453 = list);
         }
         this.renderBackground(matrices);
         this.list.render(matrices, mouseX, mouseY, delta);
         this.drawCenteredText(matrices, this.textRenderer, this.title, this.width / 2, 5, 0xFFFFFF);
         super.render(matrices, mouseX, mouseY, delta);
-        if (this.field_25453 != null) {
+        if (this.field_25453 != null)
             this.renderTooltip(matrices, this.field_25453, mouseX, mouseY);
-        }
     }
 }
 

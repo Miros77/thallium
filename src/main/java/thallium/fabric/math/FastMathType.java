@@ -15,10 +15,8 @@ public enum FastMathType {
             case VANILLA:
                 return RIVEN;
             default:
-                break;
-            
+                return VANILLA;
         }
-        return null;
     }
 
 }

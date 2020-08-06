@@ -84,11 +84,13 @@ public abstract class MixinClientChunkManager extends ChunkManager implements IC
         this.loadDistance = loadDistance;
         if (ThalliumOptions.useFastRenderer) {
             FastChunkMap clientChunkMap = new FastChunkMap(Math.max(2, loadDistance) + 3, (ClientChunkManager)(Object)this);
+            ((IChunkMap)this.chunks).setUpdating(true);
             ((IChunkMap)this.chunks).getFastMap().fastChunks.forEach((longKey,worldChunk) -> {
                 if (((IChunkMap)this.chunks).inRadius(ChunkPos.getPackedX(longKey), ChunkPos.getPackedZ(longKey)))
                     clientChunkMap.set(longKey, worldChunk);
             });
             ((IChunkMap)this.chunks).setFastMap(clientChunkMap);
+            ((IChunkMap)this.chunks).setUpdating(false);
             ci.cancel();
         }
     }

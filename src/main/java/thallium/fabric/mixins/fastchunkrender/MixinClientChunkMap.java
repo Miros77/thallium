@@ -13,7 +13,6 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.client.world.ClientChunkManager.ClientChunkMap;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.world.chunk.WorldChunk;
 import thallium.fabric.chunk.FastChunkMap;
 import thallium.fabric.gui.ThalliumOptions;
@@ -39,6 +38,8 @@ public class MixinClientChunkMap implements IChunkMap {
 
     @Shadow
     private int loadedChunkCount;
+
+    private boolean reloading;
 
     @Inject(at = @At("TAIL"), method = "<init>", cancellable = true)
     public void init(ClientChunkManager c, int loadDistance, CallbackInfo ci) {
@@ -84,22 +85,25 @@ public class MixinClientChunkMap implements IChunkMap {
 
     private ClientPlayerEntity player;
 
+    @SuppressWarnings("resource")
     @Override
     public boolean inRadius(int chunkX, int chunkZ) {
         if (null == this.player)
             player = MinecraftClient.getInstance().player;
 
-        // NORTH = -z | SOUTH = +z
-        // EAST  = +x | WEST  = -x
         boolean vanilla = Math.abs(chunkX - this.centerChunkX) <= this.radius && Math.abs(chunkZ - this.centerChunkZ) <= this.radius;
-        if (!vanilla) return false;
+        if (reloading)
+            return vanilla;
 
         int offset = ThalliumOptions.directionalRender.level;
         if (offset == -1)
             return vanilla;
 
-        Direction FACING = player.getHorizontalFacing();
-        switch (FACING) {
+        // Directional Rendering
+        // Unless in F5 Third person mode, the player can't see all the chunks behind them.
+        // In vanilla this is not taken into consideration causing excess chunks
+        // to be "in radius" when they are not in the radius.
+        switch (player.getHorizontalFacing()) {
             case NORTH:
                 if (chunkZ-offset > this.centerChunkZ)
                     return false;
@@ -130,6 +134,11 @@ public class MixinClientChunkMap implements IChunkMap {
     @Override
     public WorldChunk getChunkByIndex(int index) {
         return getChunk(index);
+    }
+
+    @Override
+    public void setUpdating(boolean bl) {
+        this.reloading = bl;
     }
 
 }

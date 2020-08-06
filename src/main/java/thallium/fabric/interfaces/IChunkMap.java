@@ -13,6 +13,6 @@ public interface IChunkMap {
 
     public WorldChunk getChunkByIndex(int index);
 
-   // public int getIndex(int i, int j);
+    public void setUpdating(boolean bl);
 
 }

@@ -64,7 +64,7 @@ public class MixinMinecraftClient {
         if (isFpsThreadRunning) return;
         isFpsThreadRunning = true;
 
-        // Thallium_Mod - Update the FPS debug string not during render time
+        // Thallium_Mod - Update the FPS debug string not during render
 
         new Thread(() -> {
             while (true) {
@@ -72,7 +72,7 @@ public class MixinMinecraftClient {
                 if (currentTime - lastFpsUpdateTime >= 1000) {
                     lastFpsUpdateTime = currentTime;
                     currentFps = this.fpsCounter;
-                    this.fpsDebugString = String.format("%d fps @" + (a + "a," + b + "b") + " T: %s%s%s%s B: %d. +Thallium", currentFps, (double)this.options.maxFps == Option.FRAMERATE_LIMIT.getMax() ? "inf" : Integer.valueOf(this.options.maxFps), this.options.enableVsync ? " vsync" : "", this.options.graphicsMode.toString(), this.options.cloudRenderMode == CloudRenderMode.OFF ? "" : (this.options.cloudRenderMode == CloudRenderMode.FAST ? " fast-clouds" : " fancy-clouds"), this.options.biomeBlendRadius);
+                    this.fpsDebugString = String.format("%d fps T: %s%s%s%s B: %d" + (this.options.debugProfilerEnabled ? " D: " + a + " A:" + b : ""), currentFps, (double)this.options.maxFps == Option.FRAMERATE_LIMIT.getMax() ? "inf" : Integer.valueOf(this.options.maxFps), this.options.enableVsync ? " vsync" : "", this.options.graphicsMode.toString(), this.options.cloudRenderMode == CloudRenderMode.OFF ? "" : (this.options.cloudRenderMode == CloudRenderMode.FAST ? " fast-clouds" : " fancy-clouds"), this.options.biomeBlendRadius);
                     this.fpsCounter = 0;
                     this.a = 0;
                     this.b = 0;
