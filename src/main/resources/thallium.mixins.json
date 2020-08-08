@@ -19,7 +19,8 @@
     "fastmath.MixinMathHelper",
     "fastchunkrender.MixinClientChunkMap",
     "fastchunkrender.MixinClientChunkManager",
-    "general.MixinVideoOptionsScreen"
+    "general.MixinVideoOptionsScreen",
+    "general.MixinOptionsScreen"
   ],
   "injectors": {
     "defaultRequire": 1

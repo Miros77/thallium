@@ -23,7 +23,7 @@ public class ThalliumOptions {
     public static boolean optimizeAnimations = true;
     public static boolean renderSkip         = true;
 
-    public static EnumDirectionalRendering directionalRender = EnumDirectionalRendering.OFF;
+    public static EnumDirectionalRendering directionalRender = EnumDirectionalRendering.NORMAL;
     public static FastMathType fastMathType = FastMathType.RIVEN;
 
     public static final BooleanOption FAST_RENDER = new BooleanOption("Use fast renderer", gameOptions -> useFastRenderer, (gameOptions, boolean_) -> {

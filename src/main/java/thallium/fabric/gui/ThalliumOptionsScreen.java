@@ -21,7 +21,7 @@ public class ThalliumOptionsScreen extends Screen {
     private static final Option[] OPTIONS = new Option[]{ThalliumOptions.FAST_RENDER, ThalliumOptions.FAST_MATH, ThalliumOptions.OPTIMIZE_ANIMATIONS,
             ThalliumOptions.RENDER_SKIP, ThalliumOptions.DIRECTIONAL_RENDER, ThalliumOptions.FAST_MATH_TYPE};
 
-    private List<StringRenderable> field_25453;
+    private List<StringRenderable> tooltipList;
     private ButtonListWidget list;
     private final class_5407 field_25688;
     private Screen parent;
@@ -57,18 +57,18 @@ public class ThalliumOptionsScreen extends Screen {
 
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        this.field_25453 = null;
+        this.tooltipList = null;
         Optional<AbstractButtonWidget> optional = this.list.getHoveredButton(mouseX, mouseY);
         if (optional.isPresent() && optional.get() instanceof OptionButtonWidget) {
             Optional<List<StringRenderable>> optional2 = ((OptionButtonWidget)optional.get()).getOption().getTooltip();
-            optional2.ifPresent(list -> this.field_25453 = list);
+            optional2.ifPresent(list -> this.tooltipList = list);
         }
         this.renderBackground(matrices);
         this.list.render(matrices, mouseX, mouseY, delta);
         this.drawCenteredText(matrices, this.textRenderer, this.title, this.width / 2, 5, 0xFFFFFF);
         super.render(matrices, mouseX, mouseY, delta);
-        if (this.field_25453 != null)
-            this.renderTooltip(matrices, this.field_25453, mouseX, mouseY);
+        if (this.tooltipList != null)
+            this.renderTooltip(matrices, this.tooltipList, mouseX, mouseY);
     }
 }
 
