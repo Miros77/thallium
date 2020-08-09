@@ -13,7 +13,7 @@ public class ThalliumMod implements ModInitializer {
 
     public static Logger LOGGER = LogManager.getLogger("Thallium");
 
-    public static boolean doUpdate = false;
+    public static boolean doUpdate = true;
     public static File saveFile;
 
 	@Override

@@ -24,65 +24,53 @@ public class MixinMinecraftClient {
     @Shadow public long nextDebugInfoUpdateTime;
 
     private long last;
-    private boolean isFpsThreadRunning;
 
     private int a = 0;
     private int b = 0;
-    private int c = 0;
 
-    private long lastFpsUpdateTime;
+    private long lastDebugUpdateTime;
+
+    @Inject(at = @At("HEAD"), method = "run")
+    public void startNewThread(CallbackInfo ci) {
+        debugUpdate(); // Redirect debug info onto separate thread
+    }
 
     @Inject(at = @At("TAIL"), method = "render")
     public void renderTail(boolean tick, CallbackInfo ci) {
-        fpsUpdate(); // Start F3 debug menu update
-
         if (!ThalliumOptions.renderSkip) {
             a++;
             return;
         }
 
         long took = System.currentTimeMillis();
-        int skip = 60;
-        if (currentFps > 420) skip = 50;
-        if (currentFps > 500) skip = 40;
-        if (currentFps > 600) skip = 30;
 
-        // Thallium_Mod
-        // This is pretty much disabled now
-        if (took - last > skip) {
+        // Thallium_Mod - This is pretty much disabled now
+        if (took - last > 60) {
             ThalliumMod.doUpdate = true;
             last = took;
-            a++;
-        } else {
-            ThalliumMod.doUpdate = c == 0 || a <= 60 || a/2 < b;
-            if (ThalliumMod.doUpdate) a++; else b++;
-            if (c > 200) c = 0; else c++;
         }
+        if ((ThalliumMod.doUpdate = a <= 60 || (a/2)-16 < b)) a++; else b++;
     }
 
-    public void fpsUpdate() {
-        if (isFpsThreadRunning) return;
-        isFpsThreadRunning = true;
-
+    public void debugUpdate() {
         // Thallium_Mod - Update the FPS debug string not during render
 
         new Thread(() -> {
             while (true) {
                 long currentTime = System.currentTimeMillis();
-                if (currentTime - lastFpsUpdateTime >= 1000) {
-                    lastFpsUpdateTime = currentTime;
+                if (currentTime - lastDebugUpdateTime >= 1000) {
+                    lastDebugUpdateTime = currentTime;
                     currentFps = this.fpsCounter;
-                    this.fpsDebugString = String.format("%d fps T: %s%s%s%s B: %d" + (this.options.debugProfilerEnabled ? " D: " + a + " A:" + b : ""), currentFps, (double)this.options.maxFps == Option.FRAMERATE_LIMIT.getMax() ? "inf" : Integer.valueOf(this.options.maxFps), this.options.enableVsync ? " vsync" : "", this.options.graphicsMode.toString(), this.options.cloudRenderMode == CloudRenderMode.OFF ? "" : (this.options.cloudRenderMode == CloudRenderMode.FAST ? " fast-clouds" : " fancy-clouds"), this.options.biomeBlendRadius);
+                    this.fpsDebugString = String.format("%d fps T: %s%s%s%s B: %d" + (this.options.debugProfilerEnabled ? " D:" + a + " A:" + b : ""), currentFps, (double)this.options.maxFps == Option.FRAMERATE_LIMIT.getMax() ? "inf" : Integer.valueOf(this.options.maxFps), this.options.enableVsync ? " vsync" : "", this.options.graphicsMode.toString(), this.options.cloudRenderMode == CloudRenderMode.OFF ? "" : (this.options.cloudRenderMode == CloudRenderMode.FAST ? " fast-clouds" : " fancy-clouds"), this.options.biomeBlendRadius);
                     this.fpsCounter = 0;
                     this.a = 0;
                     this.b = 0;
-                    this.c = 0;
                 }
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {e.printStackTrace();}
             }
-        }, "Thallium FPS Loop").start();
+        }, "Thallium F3 Loop").start();
 
         nextDebugInfoUpdateTime = Integer.MAX_VALUE; // Disable vanilla while() loop
     }
