@@ -116,10 +116,10 @@ public abstract class MixinClientChunkManager extends ChunkManager implements IC
             // copied from vanilla
             ChunkSection[] chunkSections = worldChunk.getSectionArray();
             LightingProvider lightingProvider = this.getLightingProvider();
-            lightingProvider.setLightEnabled(new ChunkPos(x, z), true);
+            lightingProvider.setColumnEnabled(new ChunkPos(x, z), true);
             for (int k = 0; k < chunkSections.length; ++k) {
                 ChunkSection chunkSection = chunkSections[k];
-                lightingProvider.updateSectionStatus(ChunkSectionPos.from(x, k, z), ChunkSection.isEmpty(chunkSection));
+                lightingProvider.setSectionStatus(ChunkSectionPos.from(x, k, z), ChunkSection.isEmpty(chunkSection));
             }
             this.world.resetChunkColor(x, z);
             ci.setReturnValue(worldChunk);

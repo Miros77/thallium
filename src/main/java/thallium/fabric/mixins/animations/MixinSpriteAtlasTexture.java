@@ -49,7 +49,6 @@ public abstract class MixinSpriteAtlasTexture extends AbstractTexture {
                 for (SpriteAtlasTexture texture : ((IChunkData) ((IChunkInfo)renderInfo).getBuiltChunk().data.get()).getVisibleTextures())
                     ((ISprite) texture).markNeedsAnimationUpdate();
     
-    
             GlStateManager.bindTexture(getGlId());
             for (Sprite texture : animatedSprites) {
                 if (((ISprite) texture).needsAnimationUpdate()) {

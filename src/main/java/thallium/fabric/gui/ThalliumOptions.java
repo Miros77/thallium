@@ -12,6 +12,7 @@ import java.util.function.BiFunction;
 import net.minecraft.client.options.BooleanOption;
 import net.minecraft.client.options.CyclingOption;
 import net.minecraft.client.options.GameOptions;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import thallium.fabric.ThalliumMod;
 import thallium.fabric.math.FastMathType;
@@ -54,7 +55,7 @@ public class ThalliumOptions {
             directionalRender = directionalRender.getNext();
             save();
         };
-        BiFunction<GameOptions, CyclingOption, Text> b = (options,cyc) -> { return cyc.getDisplayPrefix().append(directionalRender.name()); };
+        BiFunction<GameOptions, CyclingOption, Text> b = (options,cyc) -> { return new LiteralText("Directional Render: " + directionalRender.name()); };
         DIRECTIONAL_RENDER = new CyclingOption("Directional Render", a, b);
 
         BiConsumer<GameOptions, Integer> c = (options,integer) -> {
@@ -62,7 +63,7 @@ public class ThalliumOptions {
             save();
         };
         BiFunction<GameOptions, CyclingOption, Text> d = (options,cyc) -> { 
-            return cyc.getDisplayPrefix().append(useFastMath ? fastMathType.name() : "Fast Math OFF");
+            return new LiteralText("Math Algorithm: " + (useFastMath ? fastMathType.name() : "Fast Math OFF"));
         };
         FAST_MATH_TYPE = new CyclingOption("Math Algorithm", c, d);
     }

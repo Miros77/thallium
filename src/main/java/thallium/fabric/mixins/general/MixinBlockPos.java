@@ -18,24 +18,6 @@ public abstract class MixinBlockPos extends Vec3i {
      * @reason Optimized
      */
     @Overwrite
-    public BlockPos up() {
-        return new BlockPos(this.getX(), this.getY() + 1, this.getZ());
-    }
-
-    /**
-     * @author
-     * @reason Optimized
-     */
-    @Overwrite
-    public BlockPos up(int int_1) {
-        return new BlockPos(this.getX(), this.getY() + int_1, this.getZ());
-    }
-
-    /**
-     * @author
-     * @reason Optimized
-     */
-    @Overwrite
     public BlockPos north() {
         return new BlockPos(this.getX(), this.getY(), this.getZ() - 1);
     }
