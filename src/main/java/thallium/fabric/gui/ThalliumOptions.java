@@ -89,7 +89,7 @@ public class ThalliumOptions {
                 if (str.equals("directionalRender"))
                     directionalRender = EnumDirectionalRendering.values()[Integer.valueOf(key)];
                 if (str.equals("fastMathType"))
-                    directionalRender = EnumDirectionalRendering.values()[Integer.valueOf(key)];
+                    fastMathType = FastMathType.values()[Integer.valueOf(key)];
             }
             ois.close();
         } catch (IOException | ClassNotFoundException e) {
