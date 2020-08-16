@@ -17,10 +17,12 @@
     "animations.MixinSpriteAtlasTexture",
     "animations.MixinSprite",
     "fastmath.MixinMathHelper",
+    "fastmath.MixinBipedEntityModel",
     "fastchunkrender.MixinClientChunkMap",
     "fastchunkrender.MixinClientChunkManager",
     "general.MixinVideoOptionsScreen",
-    "general.MixinOptionsScreen"
+    "general.MixinOptionsScreen",
+    "hopper.MixinHopperBlockEntity"
   ],
   "injectors": {
     "defaultRequire": 1

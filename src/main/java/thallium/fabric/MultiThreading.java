@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Deprecated
 public class MultiThreading {
 
-    public static final ExecutorService POOL = Executors.newFixedThreadPool(100, new ThreadFactory() {
+    public static final ExecutorService POOL = Executors.newFixedThreadPool(500, new ThreadFactory() {
         final AtomicInteger counter = new AtomicInteger(0);
 
         @Override

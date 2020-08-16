@@ -49,7 +49,7 @@ public class MixinMinecraftClient {
             ThalliumMod.doUpdate = true;
             last = took;
         }
-        if ((ThalliumMod.doUpdate = a <= 60 || (a/2)-16 < b)) a++; else b++;
+        if ((ThalliumMod.doUpdate = (a/2)-12 < b)) a++; else b++;
     }
 
     public void debugUpdate() {

@@ -41,9 +41,7 @@ public class FastChunkMap {
        if (worldChunk != null) {
             --this.loadedChunkCount;
             ((ClientWorld)world).unloadBlockEntities(worldChunk);
-        } else {
-            this.loadedChunkCount++;
-        }
+        } else this.loadedChunkCount++;
     }
 
     public void unload(int x, int z) {

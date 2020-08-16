@@ -16,9 +16,10 @@ public class ThalliumMod implements ModInitializer {
     public static boolean doUpdate = true;
     public static File saveFile;
 
-	@Override
+	@SuppressWarnings("deprecation")
+    @Override
 	public void onInitialize() {
-	    boolean outdated = ThalliumUpdateCheck.check(this);
+	    boolean outdated = ThalliumUpdateCheck.check(this); // MultiThreaded update check
 
         LOGGER.info("Thallium " + ThalliumUpdateCheck.current + " Enabled.");
         ThalliumOptions.init();

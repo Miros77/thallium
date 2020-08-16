@@ -11,17 +11,4 @@ public enum EnumDirectionalRendering {
         this.level = level;
     }
 
-    public EnumDirectionalRendering getNext() {
-        switch (this) {
-            case FAST:
-                return OFF;
-            case NORMAL:
-                return FAST;
-            case OFF:
-                return NORMAL;
-            default:
-                return NORMAL;
-        }
-    }
-
 }
