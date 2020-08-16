@@ -29,9 +29,9 @@ public class MixinHopperBlockEntity {
     private boolean isHopperEmpty() {
         for (ItemStack i : this.inventory)
             if (!i.isEmpty()) return false;
-        Inventory above = getInputInventory((Hopper)(Object)this);
+        Inventory input = getInputInventory((Hopper)(Object)this);
 
-        return null == above || above.isEmpty();
+        return null == input || input.isEmpty();
     }
 
 }
