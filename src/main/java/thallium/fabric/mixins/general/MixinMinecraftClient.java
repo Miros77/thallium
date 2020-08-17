@@ -1,4 +1,4 @@
-package thallium.fabric.mixins.old;
+package thallium.fabric.mixins.general;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -17,8 +17,6 @@ public class MixinMinecraftClient {
     // Shadow Fields
     @Shadow public int fpsCounter;
     @Shadow public static int currentFps;
-    @Shadow public GameOptions options;
-    @Shadow public String fpsDebugString;
     @Shadow public long nextDebugInfoUpdateTime;
 
     private long lastDebugUpdateTime;
@@ -29,7 +27,7 @@ public class MixinMinecraftClient {
     }
 
     public void debugUpdate() {
-        // Thallium_Mod - Update the FPS debug string not during the main render
+        // Thallium_Mod - Update the F3 debug string not during the main render
 
         new Thread(() -> {
             while (true) {
@@ -37,7 +35,9 @@ public class MixinMinecraftClient {
                 if (currentTime - lastDebugUpdateTime >= 1000) {
                     lastDebugUpdateTime = currentTime;
                     currentFps = this.fpsCounter;
-                    this.fpsDebugString = String.format("%d fps T: %s%s%s%s B: %d", currentFps, (double)this.options.maxFps == Option.FRAMERATE_LIMIT.getMax() ? "inf" : Integer.valueOf(this.options.maxFps), this.options.enableVsync ? " vsync" : "", this.options.graphicsMode.toString(), this.options.cloudRenderMode == CloudRenderMode.OFF ? "" : (this.options.cloudRenderMode == CloudRenderMode.FAST ? " fast-clouds" : " fancy-clouds"), this.options.biomeBlendRadius);
+
+                    GameOptions options = ((MinecraftClient)(Object)this).options;
+                    ((MinecraftClient)(Object)this).fpsDebugString = String.format("%d fps T: %s%s%s%s B: %d", currentFps, (double)options.maxFps == Option.FRAMERATE_LIMIT.getMax() ? "inf" : Integer.valueOf(options.maxFps), options.enableVsync ? " vsync" : "", options.graphicsMode.toString(), options.cloudRenderMode == CloudRenderMode.OFF ? "" : (options.cloudRenderMode == CloudRenderMode.FAST ? " fast-clouds" : " fancy-clouds"), options.biomeBlendRadius);
                     this.fpsCounter = 0;
                 }
                 try {

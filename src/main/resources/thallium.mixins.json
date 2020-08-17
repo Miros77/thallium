@@ -6,11 +6,11 @@
   "mixins": [
     "fastchunkrender.MixinServerWorld",
     "general.MixinBlockPos",
-    "general.MixinLootableContainerBlockEntity"
+    "general.MixinLootableContainerBlockEntity",
+    "hopper.MixinHopperBlockEntity"
   ],
   "client": [
-    "old.MixinMinecraftClient",
-    "old.MixinGameRenderer",
+    "general.MixinMinecraftClient",
     "animations.MixinWorldRenderer",
     "animations.MixinChunkData",
     "animations.MixinChunkInfo",
@@ -22,7 +22,8 @@
     "fastchunkrender.MixinClientChunkManager",
     "general.MixinVideoOptionsScreen",
     "general.MixinOptionsScreen",
-    "hopper.MixinHopperBlockEntity"
+    "general.MixinTitleScreen",
+    "general.MixinClientWorld"
   ],
   "injectors": {
     "defaultRequire": 1

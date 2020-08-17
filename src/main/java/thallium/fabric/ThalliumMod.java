@@ -12,14 +12,12 @@ import thallium.fabric.gui.ThalliumOptions;
 public class ThalliumMod implements ModInitializer {
 
     public static Logger LOGGER = LogManager.getLogger("Thallium");
-
-    public static boolean doUpdate = true;
     public static File saveFile;
 
 	@SuppressWarnings("deprecation")
     @Override
 	public void onInitialize() {
-	    boolean outdated = ThalliumUpdateCheck.check(this); // MultiThreaded update check
+	    boolean outdated = ThalliumUpdateCheck.check(); // MultiThreaded update check
 
         LOGGER.info("Thallium " + ThalliumUpdateCheck.current + " Enabled.");
         ThalliumOptions.init();

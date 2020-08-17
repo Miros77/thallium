@@ -32,6 +32,7 @@ processResources {
 
 	from(sourceSets.main.resources.srcDirs) {
 		exclude "fabric.mod.json"
+		exclude "thallium_version.txt"
 	}
 }
 

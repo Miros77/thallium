@@ -19,19 +19,29 @@ public class MixinHopperBlockEntity {
     @Shadow public DefaultedList<ItemStack> inventory = DefaultedList.ofSize(5, ItemStack.EMPTY);
     @Shadow public static Inventory getInputInventory(Hopper hopper) {return null;}
 
+    private int vanillaCompact = 0; // Allow vanilla compact. just in case I broke anything.
+    private Inventory inv;
+
     @Inject(at = @At("HEAD"), method = "tick", cancellable = true) 
     public void hopperTick(CallbackInfo ci) {
         // ThalliumMod - Avoids searching the hopper if there is no items inside & no items in the input
-        if (ThalliumOptions.optimizeHoppers && isHopperEmpty())
-            ci.cancel();
+        //               Because I'm not good at redstone, I don't know if I have broken anything. So I will add vanilla compatibility.
+        if (ThalliumOptions.optimizeHoppers && isHopperEmpty()) {
+            vanillaCompact++; 
+            if (vanillaCompact < 80) {
+                ci.cancel();
+            } else vanillaCompact = 0;
+        }
     }
 
+    
     private boolean isHopperEmpty() {
         for (ItemStack i : this.inventory)
             if (!i.isEmpty()) return false;
-        Inventory input = getInputInventory((Hopper)(Object)this);
+        Inventory input = inv != null ? inv : getInputInventory((Hopper)(Object)this);
+        if (null != input) inv = input;
 
-        return null == input || input.isEmpty();
+        return null != input && input.isEmpty();
     }
 
 }

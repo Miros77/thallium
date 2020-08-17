@@ -11,13 +11,16 @@ import net.minecraft.client.MinecraftClient;
 
 public class ThalliumUpdateCheck {
 
-    private static boolean outdated;
-    private static boolean checked;
+    public static boolean outdated;
+    public static boolean checked;
     public static String current;
+    public static String latest;
+    public static String latestFull;
 
-    public static boolean check(ThalliumMod instance) {
+    public static boolean check() {
         if (checked) return outdated;
         current = "CURRENT_VERSION";
+
         HttpURLConnection httpurlconnection = null;
 
         try {
@@ -35,24 +38,26 @@ public class ThalliumUpdateCheck {
                 inputstream.close();
                 String str = (s = s.substring(s.indexOf("393938"))).substring(s.indexOf("latestFiles")+11, s.indexOf("gameName"));
                 String displayName = (displayName = str.substring(str.indexOf("displayName\":"))).substring(14, displayName.indexOf("\","));
+                System.out.println("THALLIUM DEBUG: " + displayName);
 
-                String cur = toString(instance.getClass().getClassLoader().getResourceAsStream("thallium_version.txt"));
+                String cur = toString(ThalliumUpdateCheck.class.getClassLoader().getResourceAsStream("thallium_version.txt"));
                 current = cur;
                 outdated = isOutdated(cur, displayName);
                 checked = true;
             } finally {
                 if (httpurlconnection != null) httpurlconnection.disconnect();
             }
-        }  catch (Exception exception) {
+        } catch (Exception exception) {
             ThalliumMod.LOGGER.info(exception.getClass().getName() + ": " + exception.getMessage());
         }
         return outdated;
     }
 
-    private static boolean isOutdated(String current, String latest) {
-        if (current.equals("${version}")) return false; // Development build
-        String latestVer = latest.substring(0, latest.indexOf("(")).replace("Thallium","").trim();
-        String mcVersion = latest.substring(latest.indexOf(latestVer) + latestVer.length() + 6).replace(")", "");
+    private static boolean isOutdated(String current, String latestD) {
+        String latestVer = latestD.replace("Thallium","").trim().split(" ")[0];
+        String mcVersion = latestD.substring(latestD.indexOf(latestVer) + latestVer.length() + 6).replace(")", "");
+        latestFull = latestD;
+        latest = latestVer;
 
         return !(latestVer.equalsIgnoreCase(current) && mcVersion.equalsIgnoreCase(MinecraftClient.getInstance().getGame().getVersion().getName()));
     }
