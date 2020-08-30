@@ -5,6 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.options.OptionsScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -21,7 +22,9 @@ public class MixinOptionsScreen extends Screen {
 
     @Inject(at = @At("RETURN"), method = "init")
     public void addCustomButton(CallbackInfo ci) {
-        this.addButton(new ButtonWidget(this.width / 2 - 155, this.height / 6 + 144 - 6, 150, 20, new LiteralText("Thallium Options"), button -> {
+        boolean moveOver = FabricLoader.getInstance().isModLoaded("bbor");
+
+        this.addButton(new ButtonWidget(moveOver ? (this.width/2 + 5) : this.width / 2 - 155, this.height / 6 + 144 - 6, 150, 20, new LiteralText("Thallium Options"), button -> {
             this.client.openScreen(new ThalliumOptionsScreen(this));
         }));
     }
