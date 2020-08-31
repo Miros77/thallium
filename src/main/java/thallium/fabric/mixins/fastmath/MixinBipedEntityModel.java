@@ -93,7 +93,7 @@ public class MixinBipedEntityModel<T extends LivingEntity> {
             // ThalliumMod - Fast Player Model: Don't use cosine to calculate limb movement.
             // TODO: I may be a little off on the timing.
             //
-            fastPitch += side ? -0.22f : 0.22f;
+            fastPitch += (side ? ThalliumOptions.modelNeg : ThalliumOptions.modelPos);
             side = fastPitch > 10 ? true : (fastPitch < -10 ? false : side);
             float fastPitchDivided = fastPitch/10;
             this.leftArm.pitch = fastPitchDivided * 2.0f * g * 0.5f / k;

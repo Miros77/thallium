@@ -10,7 +10,6 @@
     "hopper.MixinHopperBlockEntity"
   ],
   "client": [
-    "general.MixinMinecraftClient",
     "animations.MixinWorldRenderer",
     "animations.MixinChunkData",
     "animations.MixinChunkInfo",
@@ -23,7 +22,8 @@
     "general.MixinVideoOptionsScreen",
     "general.MixinOptionsScreen",
     "general.MixinTitleScreen",
-    "general.MixinClientWorld"
+    "general.MixinClientWorld",
+    "general.MixinBackgroundRenderer"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
+
 import net.minecraft.client.options.BooleanOption;
 import net.minecraft.client.options.CyclingOption;
+import net.minecraft.client.options.DoubleOption;
 import net.minecraft.text.LiteralText;
 import thallium.fabric.ThalliumMod;
 import thallium.fabric.math.FastMathType;
@@ -20,9 +22,14 @@ public class ThalliumOptions {
     public static boolean renderSkip         = true;
     public static boolean fastPlayerModel    = true;
     public static boolean optimizeHoppers    = true;
+    public static double playerModelSpeed    = 1;
+
+    public static double modelPos = 0.22f * (float)playerModelSpeed;
+    public static double modelNeg = -0.22f * (float)playerModelSpeed;
 
     public static EnumDirectionalRendering directionalRender = EnumDirectionalRendering.NORMAL;
     public static FastMathType fastMathType = FastMathType.RIVEN;
+    public static EnumFogType fogType = EnumFogType.OFF;
 
     public static final BooleanOption FAST_RENDER = new BooleanOption("Use fast renderer", gameOptions -> useFastRenderer, (gameOptions, boolean_) -> {
         useFastRenderer = true; // TODO: Fix problems with disabling fast render
@@ -54,9 +61,10 @@ public class ThalliumOptions {
         save();
     });
 
-
     public static CyclingOption DIRECTIONAL_RENDER;
     public static CyclingOption FAST_MATH_TYPE;
+    public static DoubleOption DOUBLE_TEST;
+    public static CyclingOption NO_FOG;
 
     public static void init() {
         DIRECTIONAL_RENDER = new CyclingOption("Directional Render", (options,integer) -> {
@@ -69,6 +77,18 @@ public class ThalliumOptions {
             fastMathType = fastMathType.ordinal() >= FastMathType.values().length-1 ? FastMathType.VANILLA : FastMathType.values()[fastMathType.ordinal()+1];
             save();
         }, (options,cyc) -> { return new LiteralText("Math Algorithm: " + (useFastMath ? fastMathType.name() : "Fast Math OFF")); });
+
+        DOUBLE_TEST = new DoubleOption("Testing", 1, 20, 1, test2 -> playerModelSpeed, (gameOptions, double_) -> {
+            playerModelSpeed = double_;
+            modelPos = 0.22f * (float)playerModelSpeed;
+            modelNeg = -0.22f * (float)playerModelSpeed;
+            save();
+        }, (options,cyc) -> { return new LiteralText("Model Speed: " + playerModelSpeed); });
+
+        NO_FOG = new CyclingOption("Fog Type", (options,integer) -> {
+            fogType = fogType.ordinal() >= EnumFogType.values().length-1 ? EnumFogType.NORMAL : EnumFogType.values()[fogType.ordinal()+1];
+            save();
+        }, (options,cyc) -> { return new LiteralText("Fog: " + fogType.name()); });
     }
 
     @SuppressWarnings("unchecked")
@@ -98,6 +118,10 @@ public class ThalliumOptions {
                     fastPlayerModel = Boolean.valueOf(key);
                 if (str.equals("optimizeHoppers"))
                     optimizeHoppers = Boolean.valueOf(key);
+                if (str.equals("modelSpeed"))
+                    playerModelSpeed = Double.valueOf(key);
+                if (str.equals("fogType"))
+                    fogType = EnumFogType.values()[Integer.valueOf(key)];
             }
             ois.close();
         } catch (IOException | ClassNotFoundException e) {
@@ -121,6 +145,8 @@ public class ThalliumOptions {
             map.put("fastMathType",       "" + fastMathType.ordinal());
             map.put("fastPlayerModel",    "" + fastPlayerModel);
             map.put("optimizeHoppers",    "" + optimizeHoppers);
+            map.put("modelSpeed",         "" + playerModelSpeed);
+            map.put("fogType",            "" + fogType.ordinal());
 
             ThalliumMod.saveFile.createNewFile();
             FileOutputStream fos = new FileOutputStream(ThalliumMod.saveFile);

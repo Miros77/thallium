@@ -17,7 +17,8 @@ import net.minecraft.text.OrderedText;
 public class ThalliumOptionsScreen extends Screen {
 
     private static final Option[] OPTIONS = new Option[]{ThalliumOptions.FAST_RENDER, ThalliumOptions.FAST_MATH, ThalliumOptions.OPTIMIZE_ANIMATIONS,
-            ThalliumOptions.RENDER_SKIP, ThalliumOptions.DIRECTIONAL_RENDER, ThalliumOptions.FAST_MATH_TYPE, ThalliumOptions.PLR_MODEL_OPTIMIZE, ThalliumOptions.HOPPER_OPTIMIZE};
+            ThalliumOptions.RENDER_SKIP, ThalliumOptions.DIRECTIONAL_RENDER, ThalliumOptions.FAST_MATH_TYPE, ThalliumOptions.PLR_MODEL_OPTIMIZE, ThalliumOptions.HOPPER_OPTIMIZE,
+            ThalliumOptions.DOUBLE_TEST, ThalliumOptions.NO_FOG};
 
     private List<? extends OrderedText> tooltipList;
     private ButtonListWidget list;
